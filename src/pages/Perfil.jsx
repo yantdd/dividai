@@ -9,14 +9,12 @@ function Toggle({ enabled, onToggle }) {
     <button
       type="button"
       onClick={onToggle}
-      className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-all duration-300 focus:outline-none ${
-        enabled ? 'bg-teal-500' : 'bg-gray-200'
-      }`}
+      className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-all duration-300 focus:outline-none ${enabled ? 'bg-teal-500' : 'bg-gray-200'
+        }`}
     >
       <span
-        className={`inline-block h-5 w-5 rounded-full bg-white shadow-md transform transition-transform duration-300 ${
-          enabled ? 'translate-x-6' : 'translate-x-1'
-        }`}
+        className={`inline-block h-5 w-5 rounded-full bg-white shadow-md transform transition-transform duration-300 ${enabled ? 'translate-x-6' : 'translate-x-1'
+          }`}
       />
     </button>
   );
@@ -24,7 +22,7 @@ function Toggle({ enabled, onToggle }) {
 
 export default function Perfil() {
   const navigate = useNavigate();
-  const { setIsLoggedIn } = useExpenses();
+  const { setIsLoggedIn, user } = useExpenses();
 
   // Configuração visual (apenas estado local, sem lógica real)
   const [modoEscuro, setModoEscuro] = useState(false);
@@ -39,7 +37,7 @@ export default function Perfil() {
       {/* Cabeçalho */}
       <header className="flex items-center p-4 bg-white border-b border-gray-100 shrink-0">
         <button
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate(-1)}
           className="p-2 -ml-2 text-gray-500 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-100"
         >
           <ArrowLeft size={24} />
@@ -57,7 +55,7 @@ export default function Perfil() {
             </div>
             {/* Indicador de online */}
             <span className="absolute top-1 right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white" />
-            
+
             {/* Botão de trocar foto */}
             <button
               onClick={() => {
@@ -76,8 +74,8 @@ export default function Perfil() {
             </button>
           </div>
 
-          <h2 className="text-xl font-bold text-gray-900 mb-0.5">João Silva</h2>
-          <p className="text-gray-500 text-sm">joao.silva@email.com</p>
+          <h2 className="text-xl font-bold text-gray-900 mb-0.5">{user?.name}</h2>
+          <p className="text-gray-500 text-sm">{user?.email}</p>
 
 
         </div>
@@ -110,7 +108,7 @@ export default function Perfil() {
         <div className="px-6 mt-6">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Conta</p>
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
-            <button className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors rounded-2xl">
+            <button onClick={() => navigate('/editar-perfil')} className="w-full flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors rounded-2xl">
               <span className="text-sm font-semibold text-gray-800">Editar Perfil</span>
               <ChevronRight size={18} className="text-gray-300" />
             </button>

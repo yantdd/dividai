@@ -12,7 +12,7 @@ export function ExpenseProvider({ children }) {
 
   const [selectedGroup, setSelectedGroup] = useState(null);
 
-  const [user] = useState({ id: 1, name: 'João (Você)' });
+  const [user, setUser] = useState({ id: 1, name: 'João Silva', email: 'joao.silva@email.com' });
 
   // Membros por grupo — cada membro tem um groupId
   const [allGroupMembers, setAllGroupMembers] = useState([
@@ -65,6 +65,45 @@ export function ExpenseProvider({ children }) {
       ...prev,
       { id: newId, groupId: selectedGroup.id, name: nomeFicticio }
     ]);
+  };
+
+  const removeMemberFromGroup = (memberId) => {
+    if (!selectedGroup) return;
+
+    // Opcional: Redistribui as despesas apenas entre os membros remanescentes
+    const membrosRestantes = allGroupMembers.filter(
+      m => m.groupId === selectedGroup.id && m.id !== memberId
+    );
+
+    if (membrosRestantes.length > 0) {
+      setAllExpenses(prev => prev.map(exp => {
+        if (exp.groupId !== selectedGroup.id) return exp;
+
+        const novaPorcao = exp.amount / membrosRestantes.length;
+        const novoSplit = membrosRestantes.map(m => ({
+          memberId: m.id, amount: novaPorcao
+        }));
+
+        let newPayerId = exp.payerId;
+        if (newPayerId === memberId) {
+          newPayerId = membrosRestantes[0].id;
+        }
+
+        return { ...exp, split: novoSplit, payerId: newPayerId };
+      }));
+    } else {
+      // Deleta as contas se não houver mais ninguém
+      setAllExpenses(prev => prev.filter(e => e.groupId !== selectedGroup.id));
+    }
+
+    setAllGroupMembers(prev => prev.filter(m => m.id !== memberId));
+  };
+
+  const updateUser = (data) => {
+    setUser(prev => ({ ...prev, ...data }));
+    if (data.name) {
+      setAllGroupMembers(prev => prev.map(m => m.name.includes('(Você)') ? { ...m, name: `${data.name} (Você)` } : m));
+    }
   };
 
   // Cria um novo grupo e automaticamente adiciona o usuário atual como membro
@@ -237,8 +276,10 @@ export function ExpenseProvider({ children }) {
       selectedGroup,
       setSelectedGroup,
       user,
+      updateUser,
       groupMembers,
       addMemberToGroup,
+      removeMemberFromGroup,
       expenses,
       addExpense,
       deleteExpense,

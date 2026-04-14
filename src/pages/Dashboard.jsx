@@ -43,7 +43,7 @@ function ModalConvidar({ onClose, onConfirmar }) {
       {/* Painel do modal — desliza de baixo em mobile */}
       <div className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-gray-900">Adicionar novo morador</h2>
+          <h2 className="text-lg font-bold text-gray-900">Adicionar novo membro</h2>
           <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors">
             <X size={20} />
           </button>
@@ -91,10 +91,11 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const {
     expenses, userTotalDebt, userTotalReceive,
-    deleteExpense, groupMembers, selectedGroup, addMemberToGroup
+    deleteExpense, groupMembers, selectedGroup, addMemberToGroup, removeMemberFromGroup
   } = useExpenses();
 
   const [modalAberto, setModalAberto] = useState(false);
+  const [membroParaDeletar, setMembroParaDeletar] = useState(null);
 
   const formatCurrency = (value) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -116,7 +117,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 relative pb-24">
+    <div className="flex flex-col min-h-full bg-gray-50 pb-24">
       {/* Cabeçalho */}
       <header className="bg-teal-600 text-white p-6 pb-12 rounded-b-3xl shrink-0">
         <div className="flex items-center gap-3">
@@ -167,16 +168,27 @@ export default function Dashboard() {
             </p>
           ) : (
             <div className="flex flex-wrap gap-3">
-              {groupMembers.map(member => (
-                <div key={member.id} className="flex flex-col items-center gap-1">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm ${getAvatarColor(member.name)}`}>
-                    {getInitials(member.name)}
+              {groupMembers.map(member => {
+                const isCurrentUser = member.name.includes('(Você)');
+                return (
+                  <div key={member.id} className="relative flex flex-col items-center gap-1 group/member">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm ${getAvatarColor(member.name)} relative`}>
+                      {getInitials(member.name)}
+                      {!isCurrentUser && (
+                        <button
+                          onClick={() => setMembroParaDeletar(member)}
+                          className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 shadow-sm opacity-0 group-hover/member:opacity-100 transition-opacity hover:bg-red-600 outline-none"
+                        >
+                          <X size={12} strokeWidth={3} />
+                        </button>
+                      )}
+                    </div>
+                    <span className="text-xs text-gray-500 max-w-[52px] truncate text-center">
+                      {isCurrentUser ? member.name.replace(' (Você)', ' ★') : member.name}
+                    </span>
                   </div>
-                  <span className="text-xs text-gray-500 max-w-[52px] truncate text-center">
-                    {member.name.replace(' (Você)', ' ★')}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -238,6 +250,35 @@ export default function Dashboard() {
           onClose={() => setModalAberto(false)}
           onConfirmar={handleConvidar}
         />
+      )}
+
+      {/* Modal de remover membro */}
+      {membroParaDeletar && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Remover Membro</h3>
+            <p className="text-gray-600 mb-6 font-medium text-sm">
+              Deseja realmente remover <span className="font-bold text-gray-900">"{membroParaDeletar.name}"</span> do grupo?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setMembroParaDeletar(null)}
+                className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  removeMemberFromGroup(membroParaDeletar.id);
+                  setMembroParaDeletar(null);
+                }}
+                className="flex-1 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors active:scale-95"
+              >
+                Remover
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -14,6 +14,9 @@ export default function Login() {
   const [criandoGrupo, setCriandoGrupo] = useState(false);
   const [nomeNovoGrupo, setNomeNovoGrupo] = useState('');
 
+  // Controle do modal de exclusão de grupo
+  const [grupoParaDeletar, setGrupoParaDeletar] = useState(null);
+
   const handleLogin = (e) => {
     e.preventDefault();
     if (email && password) {
@@ -48,7 +51,7 @@ export default function Login() {
   // Renderiza a parte de seleção de grupos se já estiver logado
   if (isLoggedIn) {
     return (
-      <div className="flex flex-col h-full bg-gray-50">
+      <div className="flex flex-col min-h-full bg-gray-50">
         <header className="bg-teal-600 text-white p-6 pb-8 rounded-b-3xl shadow-sm shrink-0">
           <div className="flex items-center justify-between">
             <div>
@@ -83,9 +86,7 @@ export default function Login() {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (window.confirm(`Deseja realmente excluir o grupo "${group.name}"?`)) {
-                      deleteGroup(group.id);
-                    }
+                    setGrupoParaDeletar(group);
                   }}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
                 >
@@ -130,6 +131,36 @@ export default function Login() {
             </button>
           )}
         </div>
+
+        {/* Modal de confirmação de exclusão */}
+        {grupoParaDeletar && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Excluir Grupo</h3>
+              <p className="text-gray-600 mb-6 font-medium text-sm">
+                Deseja realmente excluir <span className="font-bold text-gray-900">"{grupoParaDeletar.name}"</span>?
+                Esta ação não pode ser desfeita.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setGrupoParaDeletar(null)}
+                  className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => {
+                    deleteGroup(grupoParaDeletar.id);
+                    setGrupoParaDeletar(null);
+                  }}
+                  className="flex-1 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors active:scale-95"
+                >
+                  Excluir
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -140,7 +171,7 @@ export default function Login() {
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-10">
           <div className="flex flex-col items-center justify-center mb-6 mt-4">
-            <img src="/logo.png" alt="DividAí Logo" className="w-48 h-auto object-contain drop-shadow-md hover:scale-105 transition-transform" />
+            <img src="/logo.png" alt="DividAí Logo" className="w-48 h-auto object-contain drop-shadow-md hover:scale-105 transition-transform mix-blend-multiply" />
           </div>
           <p className="text-gray-500 text-center text-sm px-4">
             Acesse sua conta para organizar e dividir as despesas da turma.

@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import DespesaDetalhes from './pages/DespesaDetalhes';
 import NovaDespesa from './pages/NovaDespesa';
 import Perfil from './pages/Perfil';
+import EditarPerfil from './pages/EditarPerfil';
 import Cadastro from './pages/Cadastro';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
             <Route path="despesa/:id" element={<DespesaDetalhes />} />
             <Route path="nova-despesa" element={<NovaDespesa />} />
             <Route path="perfil" element={<Perfil />} />
+            <Route path="editar-perfil" element={<EditarPerfil />} />
             <Route path="cadastro" element={<Cadastro />} />
           </Route>
         </Routes>

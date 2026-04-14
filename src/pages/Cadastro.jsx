@@ -68,7 +68,6 @@ export default function Cadastro() {
         ) : (
           <div className="w-full max-w-sm mx-auto">
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-1">Bem-vindo ao DividAí 👋</h2>
               <p className="text-sm text-gray-500">Preencha os dados abaixo para criar sua conta.</p>
             </div>
 
@@ -148,11 +147,10 @@ export default function Cadastro() {
                     value={confirmarSenha}
                     onChange={(e) => setConfirmarSenha(e.target.value)}
                     placeholder="Repita a senha"
-                    className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 transition-all text-gray-800 ${
-                      erroCampo
+                    className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 transition-all text-gray-800 ${erroCampo
                         ? 'border-red-400 focus:ring-red-300'
                         : 'border-gray-200 focus:ring-teal-500'
-                    }`}
+                      }`}
                   />
                 </div>
               </div>
