@@ -10,7 +10,7 @@ function Toggle({ enabled, onToggle }) {
       type="button"
       onClick={onToggle}
       className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-all duration-300 focus:outline-none ${
-        enabled ? 'bg-violet-500' : 'bg-gray-200'
+        enabled ? 'bg-teal-500' : 'bg-gray-200'
       }`}
     >
       <span
@@ -52,7 +52,7 @@ export default function Perfil() {
         <div className="bg-white px-6 pt-8 pb-6 flex flex-col items-center border-b border-gray-100">
           {/* Avatar Placeholder */}
           <div className="relative w-24 h-24 mb-4">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-violet-400 to-violet-700 flex items-center justify-center shadow-lg shadow-violet-200 overflow-hidden relative group">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-teal-400 to-teal-700 flex items-center justify-center shadow-lg shadow-teal-200 overflow-hidden relative group">
               <UserCircle2 size={56} className="text-white opacity-90" />
             </div>
             {/* Indicador de online */}
@@ -69,7 +69,7 @@ export default function Perfil() {
                 };
                 input.click();
               }}
-              className="absolute bottom-0 right-0 w-8 h-8 bg-violet-600 text-white rounded-full flex items-center justify-center shadow-md border-2 border-white hover:bg-violet-700 transition-all active:scale-90"
+              className="absolute bottom-0 right-0 w-8 h-8 bg-teal-600 text-white rounded-full flex items-center justify-center shadow-md border-2 border-white hover:bg-teal-700 transition-all active:scale-90"
               title="Mudar foto de perfil"
             >
               <Camera size={16} />

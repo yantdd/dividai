@@ -75,11 +75,11 @@ export default function Cadastro() {
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Nome */}
               <div className="group">
-                <label className="block text-sm font-semibold text-gray-700 mb-1 transition-colors group-focus-within:text-violet-600">
+                <label className="block text-sm font-semibold text-gray-700 mb-1 transition-colors group-focus-within:text-teal-600">
                   Nome completo
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-violet-500 transition-colors">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-teal-500 transition-colors">
                     <User size={20} />
                   </span>
                   <input
@@ -88,18 +88,18 @@ export default function Cadastro() {
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
                     placeholder="João Silva"
-                    className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all text-gray-800"
+                    className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all text-gray-800"
                   />
                 </div>
               </div>
 
               {/* E-mail */}
               <div className="group">
-                <label className="block text-sm font-semibold text-gray-700 mb-1 transition-colors group-focus-within:text-violet-600">
+                <label className="block text-sm font-semibold text-gray-700 mb-1 transition-colors group-focus-within:text-teal-600">
                   E-mail
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-violet-500 transition-colors">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-teal-500 transition-colors">
                     <Mail size={20} />
                   </span>
                   <input
@@ -108,18 +108,18 @@ export default function Cadastro() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="seu@email.com"
-                    className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all text-gray-800"
+                    className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all text-gray-800"
                   />
                 </div>
               </div>
 
               {/* Senha */}
               <div className="group">
-                <label className="block text-sm font-semibold text-gray-700 mb-1 transition-colors group-focus-within:text-violet-600">
+                <label className="block text-sm font-semibold text-gray-700 mb-1 transition-colors group-focus-within:text-teal-600">
                   Senha
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-violet-500 transition-colors">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-teal-500 transition-colors">
                     <Lock size={20} />
                   </span>
                   <input
@@ -128,18 +128,18 @@ export default function Cadastro() {
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
                     placeholder="Mínimo 6 caracteres"
-                    className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all text-gray-800"
+                    className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all text-gray-800"
                   />
                 </div>
               </div>
 
               {/* Confirmar Senha */}
               <div className="group">
-                <label className="block text-sm font-semibold text-gray-700 mb-1 transition-colors group-focus-within:text-violet-600">
+                <label className="block text-sm font-semibold text-gray-700 mb-1 transition-colors group-focus-within:text-teal-600">
                   Confirmar Senha
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-violet-500 transition-colors">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-teal-500 transition-colors">
                     <Lock size={20} />
                   </span>
                   <input
@@ -151,7 +151,7 @@ export default function Cadastro() {
                     className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 transition-all text-gray-800 ${
                       erroCampo
                         ? 'border-red-400 focus:ring-red-300'
-                        : 'border-gray-200 focus:ring-violet-500'
+                        : 'border-gray-200 focus:ring-teal-500'
                     }`}
                   />
                 </div>
@@ -169,7 +169,7 @@ export default function Cadastro() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl shadow-md text-white bg-violet-600 hover:bg-violet-700 font-semibold transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl shadow-md text-white bg-teal-600 hover:bg-teal-700 font-semibold transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <Loader2 size={20} className="animate-spin" />
@@ -184,7 +184,7 @@ export default function Cadastro() {
               Já tem uma conta?{' '}
               <button
                 onClick={() => navigate('/')}
-                className="text-violet-600 font-semibold hover:underline"
+                className="text-teal-600 font-semibold hover:underline"
               >
                 Fazer login
               </button>

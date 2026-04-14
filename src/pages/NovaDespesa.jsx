@@ -76,10 +76,10 @@ export default function NovaDespesa() {
               onClick={handleSimulateUpload}
               className={`w-full h-36 border-2 border-dashed rounded-2xl p-4 flex flex-col items-center justify-center transition-all ${
                 isAnalyzing 
-                  ? 'border-violet-400 bg-violet-50 text-violet-600' 
+                  ? 'border-teal-400 bg-teal-50 text-teal-600' 
                   : analyzedSuccess
                     ? 'border-emerald-400 bg-emerald-50 text-emerald-600'
-                    : 'border-gray-300 bg-gray-50 text-gray-400 hover:border-violet-400 hover:text-violet-600 hover:bg-violet-50 focus:ring-2 focus:ring-violet-500'
+                    : 'border-gray-300 bg-gray-50 text-gray-400 hover:border-teal-400 hover:text-teal-600 hover:bg-teal-50 focus:ring-2 focus:ring-teal-500'
               }`}
             >
               {isAnalyzing ? (
@@ -119,7 +119,7 @@ export default function NovaDespesa() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Ex: Combustível viagem, Pizzaria..." 
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-gray-800"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all font-medium text-gray-800"
                 required
               />
             </div>
@@ -130,7 +130,7 @@ export default function NovaDespesa() {
               <select 
                 value={payerId}
                 onChange={(e) => setPayerId(Number(e.target.value))}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all font-medium text-gray-800 appearance-none"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all font-medium text-gray-800 appearance-none"
               >
                 {groupMembers.map(member => (
                   <option key={member.id} value={member.id}>
@@ -154,7 +154,7 @@ export default function NovaDespesa() {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0,00" 
-                  className={`w-full border border-gray-200 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all font-bold text-gray-800 text-lg ${
+                  className={`w-full border border-gray-200 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all font-bold text-gray-800 text-lg ${
                     analyzedSuccess ? 'bg-emerald-50 ring-2 ring-emerald-300 ring-offset-1' : 'bg-gray-50 focus:bg-white'
                   }`}
                   required
@@ -168,7 +168,7 @@ export default function NovaDespesa() {
           <button 
             type="submit" 
             disabled={loading || isAnalyzing}
-            className="w-full flex justify-center items-center py-4 px-4 rounded-xl shadow-md text-white bg-violet-600 hover:bg-violet-700 font-semibold transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full flex justify-center items-center py-4 px-4 rounded-xl shadow-md text-white bg-teal-600 hover:bg-teal-700 font-semibold transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {loading ? <Loader2 size={22} className="animate-spin" /> : 'Salvar no Grupo'}
           </button>

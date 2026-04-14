@@ -90,7 +90,7 @@ export default function DespesaDetalhes() {
               {expense.date} · Pago por <span className="font-semibold text-gray-700">{getMemberName(currentPayerId)}</span>
             </p>
             <h2 className="text-2xl font-bold text-gray-900 leading-tight">{expense.title}</h2>
-            <p className="text-4xl font-black text-violet-600 mt-2 tracking-tight">{formatCurrency(expense.amount)}</p>
+            <p className="text-4xl font-black text-teal-600 mt-2 tracking-tight">{formatCurrency(expense.amount)}</p>
           </div>
 
           <section>
@@ -111,7 +111,7 @@ export default function DespesaDetalhes() {
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                     isEditing
                       ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                      : 'bg-violet-100 text-violet-700 hover:bg-violet-200'
+                      : 'bg-teal-100 text-teal-700 hover:bg-teal-200'
                   }`}
                 >
                   {isEditing ? <CheckCircle2 size={16} /> : <Edit2 size={14} />}
@@ -160,7 +160,7 @@ export default function DespesaDetalhes() {
                 return (
                   <li key={member.id} className={`flex items-center justify-between p-2 rounded-xl transition-colors ${isPayer ? 'bg-amber-50' : ''}`}>
                     <div className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${isPayer ? 'bg-amber-400 text-white' : currentAmount > 0 ? 'bg-violet-500 text-white' : 'bg-gray-200'}`}>
+                      <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${isPayer ? 'bg-amber-400 text-white' : currentAmount > 0 ? 'bg-teal-500 text-white' : 'bg-gray-200'}`}>
                         {isPayer ? <Crown size={12} /> : currentAmount > 0 ? <CheckCircle2 size={12} /> : null}
                       </div>
                       <span className={`font-medium text-sm ${isPayer ? 'text-amber-700' : 'text-gray-700'}`}>
@@ -179,7 +179,7 @@ export default function DespesaDetalhes() {
                           value={currentAmount === 0 ? '' : currentAmount}
                           onChange={(e) => handleSplitChange(member.id, e.target.value)}
                           placeholder="0,00"
-                          className="w-20 text-right font-bold text-gray-900 border border-violet-300 rounded-lg px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 text-sm"
+                          className="w-20 text-right font-bold text-gray-900 border border-teal-300 rounded-lg px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
                         />
                       ) : (
                         <span className={`font-bold text-sm ${isPayer ? 'text-amber-600' : 'text-gray-900'}`}>

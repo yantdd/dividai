@@ -49,7 +49,7 @@ export default function Login() {
   if (isLoggedIn) {
     return (
       <div className="flex flex-col h-full bg-gray-50">
-        <header className="bg-violet-600 text-white p-6 pb-8 rounded-b-3xl shadow-sm shrink-0">
+        <header className="bg-teal-600 text-white p-6 pb-8 rounded-b-3xl shadow-sm shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold">Meus Grupos</h1>
@@ -57,7 +57,7 @@ export default function Login() {
             </div>
             <button
               onClick={() => navigate('/perfil')}
-              className="p-2 text-violet-100 hover:text-white transition-colors rounded-full hover:bg-violet-500"
+              className="p-2 text-teal-100 hover:text-white transition-colors rounded-full hover:bg-teal-500"
             >
               <UserCircle2 size={28} />
             </button>
@@ -70,15 +70,15 @@ export default function Login() {
               <div key={group.id} className="relative group/card">
                 <button
                   onClick={() => handleEntrarGrupo(group)}
-                  className="w-full text-left flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm border border-gray-100 hover:border-violet-300 hover:shadow-md transition-all active:scale-95 pr-14"
+                  className="w-full text-left flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm border border-gray-100 hover:border-teal-300 hover:shadow-md transition-all active:scale-95 pr-14"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center group-hover:bg-violet-200 transition-colors">
+                    <div className="w-12 h-12 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center group-hover:bg-teal-200 transition-colors">
                       <Users size={24} />
                     </div>
                     <span className="font-semibold text-gray-800 text-lg">{group.name}</span>
                   </div>
-                  <ChevronRight size={20} className="text-gray-300 group-hover:text-violet-500 transition-colors" />
+                  <ChevronRight size={20} className="text-gray-300 group-hover:text-teal-500 transition-colors" />
                 </button>
                 <button
                   onClick={(e) => {
@@ -97,7 +97,7 @@ export default function Login() {
 
           {/* Formulário inline para criar novo grupo */}
           {criandoGrupo ? (
-            <div className="flex items-center gap-2 p-3 bg-white rounded-2xl border-2 border-violet-300 shadow-sm">
+            <div className="flex items-center gap-2 p-3 bg-white rounded-2xl border-2 border-teal-300 shadow-sm">
               <input
                 type="text"
                 autoFocus
@@ -109,7 +109,7 @@ export default function Login() {
               />
               <button
                 onClick={handleConfirmarGrupo}
-                className="w-9 h-9 flex items-center justify-center rounded-xl bg-violet-600 text-white hover:bg-violet-700 transition-colors shrink-0"
+                className="w-9 h-9 flex items-center justify-center rounded-xl bg-teal-600 text-white hover:bg-teal-700 transition-colors shrink-0"
               >
                 <Check size={18} />
               </button>
@@ -123,7 +123,7 @@ export default function Login() {
           ) : (
             <button
               onClick={handleAbrirCriarGrupo}
-              className="w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-gray-300 rounded-2xl text-gray-500 hover:text-violet-600 hover:border-violet-400 hover:bg-violet-50 transition-all font-medium active:scale-95"
+              className="w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-gray-300 rounded-2xl text-gray-500 hover:text-teal-600 hover:border-teal-400 hover:bg-teal-50 transition-all font-medium active:scale-95"
             >
               <Plus size={20} />
               Criar Novo Grupo
@@ -139,10 +139,9 @@ export default function Login() {
     <div className="flex flex-col h-full bg-white p-6 justify-center items-center">
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-10">
-          <div className="w-20 h-20 bg-violet-100 text-violet-600 flex items-center justify-center rounded-3xl mb-6 shadow-sm border border-violet-200">
-            <Users size={40} />
+          <div className="flex flex-col items-center justify-center mb-6 mt-4">
+            <img src="/logo.png" alt="DividAí Logo" className="w-48 h-auto object-contain drop-shadow-md hover:scale-105 transition-transform" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2 tracking-tight">DividAí</h1>
           <p className="text-gray-500 text-center text-sm px-4">
             Acesse sua conta para organizar e dividir as despesas da turma.
           </p>
@@ -150,11 +149,11 @@ export default function Login() {
         
         <form onSubmit={handleLogin} className="space-y-5 w-full">
           <div className="space-y-1 group">
-            <label className="block text-sm font-semibold text-gray-700 transition-colors group-focus-within:text-violet-600">
+            <label className="block text-sm font-semibold text-gray-700 transition-colors group-focus-within:text-teal-600">
               E-mail
             </label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-violet-500 transition-colors">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-teal-500 transition-colors">
                 <Mail size={20} />
               </span>
               <input 
@@ -163,17 +162,17 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
-                className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all text-gray-800"
+                className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all text-gray-800"
               />
             </div>
           </div>
 
           <div className="space-y-1 group">
-            <label className="block text-sm font-semibold text-gray-700 transition-colors group-focus-within:text-violet-600">
+            <label className="block text-sm font-semibold text-gray-700 transition-colors group-focus-within:text-teal-600">
               Senha
             </label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-violet-500 transition-colors">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-teal-500 transition-colors">
                 <Lock size={20} />
               </span>
               <input 
@@ -182,7 +181,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all text-gray-800"
+                className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all text-gray-800"
               />
             </div>
           </div>
@@ -190,7 +189,7 @@ export default function Login() {
           <div className="pt-4">
             <button 
               type="submit" 
-              className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl shadow-md text-white bg-violet-600 hover:bg-violet-700 hover:shadow-lg font-semibold transition-all active:scale-95"
+              className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl shadow-md text-white bg-teal-600 hover:bg-teal-700 hover:shadow-lg font-semibold transition-all active:scale-95"
             >
               <LogIn size={20} />
               Entrar
@@ -200,7 +199,7 @@ export default function Login() {
 
         <p className="mt-8 text-center text-sm text-gray-500">
           Não tem uma conta?{' '}
-          <button onClick={() => navigate('/cadastro')} className="text-violet-600 font-semibold hover:underline">Cadastre-se</button>
+          <button onClick={() => navigate('/cadastro')} className="text-teal-600 font-semibold hover:underline">Cadastre-se</button>
         </p>
       </div>
     </div>

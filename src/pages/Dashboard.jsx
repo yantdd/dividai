@@ -6,8 +6,8 @@ import { useExpenses } from '../contexts/ExpenseContext';
 // Gera uma cor de fundo para o avatar a partir do nome (determinística)
 function getAvatarColor(name) {
   const cores = [
-    'bg-violet-500', 'bg-blue-500', 'bg-emerald-500',
-    'bg-orange-500', 'bg-pink-500', 'bg-teal-500', 'bg-indigo-500',
+    'bg-teal-500', 'bg-amber-500', 'bg-emerald-500',
+    'bg-orange-500', 'bg-rose-500', 'bg-yellow-500', 'bg-red-400',
   ];
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + hash;
@@ -58,7 +58,7 @@ function ModalConvidar({ onClose, onConfirmar }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="amigo@email.com"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
               required
             />
             <p className="text-xs text-gray-400 mt-1.5">
@@ -76,7 +76,7 @@ function ModalConvidar({ onClose, onConfirmar }) {
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 rounded-xl bg-violet-600 text-white font-semibold hover:bg-violet-700 transition-colors shadow-sm active:scale-95"
+              className="flex-1 py-3 rounded-xl bg-teal-600 text-white font-semibold hover:bg-teal-700 transition-colors shadow-sm active:scale-95"
             >
               Adicionar
             </button>
@@ -118,16 +118,16 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col h-full bg-gray-50 relative pb-24">
       {/* Cabeçalho */}
-      <header className="bg-violet-600 text-white p-6 pb-12 rounded-b-3xl shrink-0">
+      <header className="bg-teal-600 text-white p-6 pb-12 rounded-b-3xl shrink-0">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/')} className="p-2 -ml-2 text-violet-100 hover:text-white transition-colors rounded-full hover:bg-violet-500">
+          <button onClick={() => navigate('/')} className="p-2 -ml-2 text-teal-100 hover:text-white transition-colors rounded-full hover:bg-teal-500">
             <ArrowLeft size={24} />
           </button>
           <div className="flex-1">
             <h1 className="text-xl font-bold">{selectedGroup ? selectedGroup.name : 'Meu Grupo'}</h1>
             <p className="opacity-80 text-sm mt-1">Resumo Financeiro</p>
           </div>
-          <button onClick={() => navigate('/perfil')} className="p-2 text-violet-100 hover:text-white transition-colors rounded-full hover:bg-violet-500">
+          <button onClick={() => navigate('/perfil')} className="p-2 text-teal-100 hover:text-white transition-colors rounded-full hover:bg-teal-500">
             <UserCircle2 size={28} />
           </button>
         </div>
@@ -154,7 +154,7 @@ export default function Dashboard() {
             </p>
             <button
               onClick={() => setModalAberto(true)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-violet-600 bg-violet-50 hover:bg-violet-100 px-3 py-1.5 rounded-full transition-colors"
+              className="flex items-center gap-1.5 text-xs font-semibold text-teal-600 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-full transition-colors"
             >
               <UserPlus size={14} />
               Adicionar
@@ -198,9 +198,9 @@ export default function Dashboard() {
               <div
                 key={expense.id}
                 onClick={() => navigate(`/despesa/${expense.id}`)}
-                className="group flex flex-row items-center p-4 bg-white rounded-2xl shadow-sm border border-gray-100 hover:border-violet-300 transition-all hover:shadow-md cursor-pointer active:scale-[0.98]"
+                className="group flex flex-row items-center p-4 bg-white rounded-2xl shadow-sm border border-gray-100 hover:border-teal-300 transition-all hover:shadow-md cursor-pointer active:scale-[0.98]"
               >
-                <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-full flex items-center justify-center mr-4 group-hover:bg-violet-50 group-hover:text-violet-600 transition-colors">
+                <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-full flex items-center justify-center mr-4 group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
                   <Receipt size={24} />
                 </div>
                 <div className="flex-1 overflow-hidden">
@@ -227,7 +227,7 @@ export default function Dashboard() {
       {/* Floating Action Button */}
       <Link
         to="/nova-despesa"
-        className="absolute bottom-6 right-6 w-14 h-14 bg-violet-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-violet-700 hover:shadow-xl transition-all hover:-translate-y-1 active:scale-90 z-20"
+        className="absolute bottom-6 right-6 w-14 h-14 bg-teal-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-teal-700 hover:shadow-xl transition-all hover:-translate-y-1 active:scale-90 z-20"
       >
         <Plus size={24} />
       </Link>
