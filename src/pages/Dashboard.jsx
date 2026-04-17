@@ -37,11 +37,11 @@ function ModalConvidar({ onClose, onConfirmar }) {
   return (
     // Fundo escuro semi-transparente
     <div
-      className="absolute inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      {/* Painel do modal — desliza de baixo em mobile */}
-      <div className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl">
+      {/* Painel do modal — centrado em todas as telas para evitar bugs no mobile */}
+      <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold text-gray-900">Adicionar novo membro</h2>
           <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors">
@@ -117,10 +117,10 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-gray-50 pb-24">
+    <div className="flex flex-col flex-1 bg-gray-50 pb-24">
       {/* Cabeçalho */}
       <header className="bg-teal-600 text-white p-6 pb-12 rounded-b-3xl shrink-0">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 max-w-6xl mx-auto w-full">
           <button onClick={() => navigate('/')} className="p-2 -ml-2 text-teal-100 hover:text-white transition-colors rounded-full hover:bg-teal-500">
             <ArrowLeft size={24} />
           </button>
@@ -135,7 +135,7 @@ export default function Dashboard() {
       </header>
 
       {/* Cards financeiros */}
-      <div className="px-6 -mt-6 relative z-10 shrink-0 grid grid-cols-2 gap-4">
+      <div className="px-6 -mt-6 relative z-10 shrink-0 grid grid-cols-2 gap-4 max-w-6xl mx-auto w-full">
         <div className="bg-white rounded-2xl shadow-sm p-4 outline outline-1 outline-gray-100 border-l-4 border-l-red-500">
           <p className="text-gray-500 text-xs font-semibold uppercase tracking-wide">Você deve</p>
           <p className="text-xl font-bold text-red-600 mt-1">{formatCurrency(userTotalDebt)}</p>
@@ -147,7 +147,7 @@ export default function Dashboard() {
       </div>
 
       {/* Seção de membros */}
-      <div className="px-6 mt-5 shrink-0">
+      <div className="px-6 mt-5 shrink-0 max-w-6xl mx-auto w-full">
         <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">
@@ -195,7 +195,7 @@ export default function Dashboard() {
       </div>
 
       {/* Lista de despesas */}
-      <div className="flex-1 p-6 mt-2 overflow-y-auto">
+      <div className="flex-1 p-6 mt-2 overflow-y-auto max-w-6xl mx-auto w-full w-full custom-scroll">
         <h2 className="font-semibold text-gray-800 mb-4">Despesas Recentes</h2>
 
         {expenses.length === 0 ? (
@@ -239,7 +239,7 @@ export default function Dashboard() {
       {/* Floating Action Button */}
       <Link
         to="/nova-despesa"
-        className="absolute bottom-6 right-6 w-14 h-14 bg-teal-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-teal-700 hover:shadow-xl transition-all hover:-translate-y-1 active:scale-90 z-20"
+        className="fixed bottom-6 right-6 sm:bottom-8 sm:right-12 xl:right-32 w-14 h-14 bg-teal-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-teal-700 hover:shadow-xl transition-all hover:-translate-y-1 active:scale-90 z-20"
       >
         <Plus size={24} />
       </Link>
@@ -254,7 +254,7 @@ export default function Dashboard() {
 
       {/* Modal de remover membro */}
       {membroParaDeletar && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl">
             <h3 className="text-xl font-bold text-gray-900 mb-2">Remover Membro</h3>
             <p className="text-gray-600 mb-6 font-medium text-sm">

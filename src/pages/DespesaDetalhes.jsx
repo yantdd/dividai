@@ -65,17 +65,21 @@ export default function DespesaDetalhes() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white relative">
+    <div className="flex flex-col flex-1 bg-white relative">
       <header className="flex items-center p-4 border-b border-gray-100 shrink-0">
-        <button onClick={() => navigate('/dashboard')} className="p-2 -ml-2 text-gray-500 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-100">
-          <ArrowLeft size={24} />
-        </button>
-        <h1 className="flex-1 text-center font-semibold text-gray-900 pr-8">Detalhes da Despesa</h1>
+        <div className="flex items-center w-full max-w-3xl mx-auto relative">
+          <button onClick={() => navigate('/dashboard')} className="p-2 -ml-2 text-gray-500 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-100 relative z-10">
+            <ArrowLeft size={24} />
+          </button>
+          <h1 className="flex-1 text-center font-semibold text-gray-900 absolute inset-0 flex items-center justify-center pointer-events-none">
+            Detalhes da Despesa
+          </h1>
+        </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto pb-6">
+      <div className="flex-1 overflow-y-auto pb-6 w-full max-w-3xl mx-auto custom-scroll flex-col">
         {/* Placeholder da Foto da Nota Fiscal */}
-        <div className="w-full h-48 bg-gray-100 flex flex-col items-center justify-center text-gray-400 group relative">
+        <div className="w-full h-48 sm:h-64 sm:rounded-2xl sm:mt-6 bg-gray-100 flex flex-col items-center justify-center text-gray-400 group relative">
           <ImageIcon size={40} className="mb-2 opacity-50" />
           <span className="text-sm font-medium">Nota Fiscal (Upload)</span>
           <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

@@ -33,21 +33,25 @@ export default function Perfil() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50">
+    <div className="flex flex-col flex-1 bg-gray-50">
       {/* Cabeçalho */}
       <header className="flex items-center p-4 bg-white border-b border-gray-100 shrink-0">
-        <button
-          onClick={() => navigate(-1)}
-          className="p-2 -ml-2 text-gray-500 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-100"
-        >
-          <ArrowLeft size={24} />
-        </button>
-        <h1 className="flex-1 text-center font-semibold text-gray-900 pr-8">Meu Perfil</h1>
+        <div className="flex items-center w-full max-w-3xl mx-auto relative">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 -ml-2 text-gray-500 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-100 relative z-10"
+          >
+            <ArrowLeft size={24} />
+          </button>
+          <h1 className="flex-1 text-center font-semibold text-gray-900 absolute inset-0 flex items-center justify-center pointer-events-none">
+            Meu Perfil
+          </h1>
+        </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto pb-8">
+      <div className="flex-1 overflow-y-auto pb-8 w-full max-w-3xl mx-auto custom-scroll">
         {/* Seção de Foto e Dados do Usuário */}
-        <div className="bg-white px-6 pt-8 pb-6 flex flex-col items-center border-b border-gray-100">
+        <div className="bg-white rounded-2xl mx-6 mt-6 px-6 pt-8 pb-6 flex flex-col items-center shadow-sm">
           {/* Avatar Placeholder */}
           <div className="relative w-24 h-24 mb-4">
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-teal-400 to-teal-700 flex items-center justify-center shadow-lg shadow-teal-200 overflow-hidden relative group">

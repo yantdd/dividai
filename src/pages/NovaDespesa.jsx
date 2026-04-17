@@ -57,15 +57,19 @@ export default function NovaDespesa() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white relative">
+    <div className="flex flex-col flex-1 bg-white relative">
       <header className="flex items-center p-4 border-b border-gray-100 shrink-0">
-        <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-gray-500 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-100">
-          <ArrowLeft size={24} />
-        </button>
-        <h1 className="flex-1 text-center font-semibold text-gray-900 pr-8">Nova Despesa</h1>
+        <div className="flex items-center w-full max-w-3xl mx-auto relative">
+          <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-gray-500 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-100 relative z-10">
+            <ArrowLeft size={24} />
+          </button>
+          <h1 className="flex-1 text-center font-semibold text-gray-900 absolute inset-0 flex items-center justify-center pointer-events-none">
+            Nova Despesa
+          </h1>
+        </div>
       </header>
 
-      <form className="p-6 flex-1 flex flex-col overflow-y-auto" onSubmit={handleSubmit}>
+      <form className="p-6 flex-1 flex flex-col overflow-y-auto w-full max-w-3xl mx-auto w-full custom-scroll" onSubmit={handleSubmit}>
         <div className="space-y-6 flex-1">
           
           {/* Zona de Upload / IA */}

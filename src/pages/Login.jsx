@@ -6,7 +6,7 @@ import { useExpenses } from '../contexts/ExpenseContext';
 export default function Login() {
   const navigate = useNavigate();
   const { isLoggedIn, setIsLoggedIn, groups, createGroup, deleteGroup, setSelectedGroup } = useExpenses();
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -51,9 +51,9 @@ export default function Login() {
   // Renderiza a parte de seleção de grupos se já estiver logado
   if (isLoggedIn) {
     return (
-      <div className="flex flex-col min-h-full bg-gray-50">
+      <div className="flex flex-col flex-1 bg-gray-50">
         <header className="bg-teal-600 text-white p-6 pb-8 rounded-b-3xl shadow-sm shrink-0">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between max-w-4xl mx-auto w-full">
             <div>
               <h1 className="text-2xl font-bold">Meus Grupos</h1>
               <p className="opacity-80 text-sm mt-1">Selecione uma república ou evento</p>
@@ -67,7 +67,7 @@ export default function Login() {
           </div>
         </header>
 
-        <div className="flex-1 p-6 overflow-y-auto w-full max-w-md mx-auto">
+        <div className="flex-1 p-6 overflow-y-auto w-full max-w-4xl mx-auto">
           <div className="space-y-4 mb-8">
             {groups.map((group) => (
               <div key={group.id} className="relative group/card">
@@ -134,7 +134,7 @@ export default function Login() {
 
         {/* Modal de confirmação de exclusão */}
         {grupoParaDeletar && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl">
               <h3 className="text-xl font-bold text-gray-900 mb-2">Excluir Grupo</h3>
               <p className="text-gray-600 mb-6 font-medium text-sm">
@@ -167,17 +167,17 @@ export default function Login() {
 
   // Renderiza o formulário de login se não estiver logado
   return (
-    <div className="flex flex-col h-full bg-white p-6 justify-center items-center">
+    <div className="flex flex-col flex-1 bg-white p-6 justify-center items-center">
       <div className="w-full max-w-sm">
-        <div className="flex flex-col items-center mb-10">
-          <div className="flex flex-col items-center justify-center mb-6 mt-4">
-            <img src="/logo.png" alt="DividAí Logo" className="w-48 h-auto object-contain drop-shadow-md hover:scale-105 transition-transform mix-blend-multiply" />
+        <div className="flex flex-col items-center mb-6">
+          <div className="flex flex-col items-center justify-center mb-4 mt-2">
+            <img src="/logo.png" alt="DividAí Logo" className="w-32 h-auto object-contain hover:scale-105 transition-transform mix-blend-multiply" />
           </div>
           <p className="text-gray-500 text-center text-sm px-4">
             Acesse sua conta para organizar e dividir as despesas da turma.
           </p>
         </div>
-        
+
         <form onSubmit={handleLogin} className="space-y-5 w-full">
           <div className="space-y-1 group">
             <label className="block text-sm font-semibold text-gray-700 transition-colors group-focus-within:text-teal-600">
@@ -187,8 +187,8 @@ export default function Login() {
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-teal-500 transition-colors">
                 <Mail size={20} />
               </span>
-              <input 
-                type="email" 
+              <input
+                type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -206,7 +206,7 @@ export default function Login() {
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-teal-500 transition-colors">
                 <Lock size={20} />
               </span>
-              <input 
+              <input
                 type="password"
                 required
                 value={password}
@@ -218,8 +218,8 @@ export default function Login() {
           </div>
 
           <div className="pt-4">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl shadow-md text-white bg-teal-600 hover:bg-teal-700 hover:shadow-lg font-semibold transition-all active:scale-95"
             >
               <LogIn size={20} />
