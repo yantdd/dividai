@@ -136,6 +136,18 @@ export default function Dashboard() {
 
       {/* Cards financeiros */}
       <div className="px-6 -mt-6 relative z-10 shrink-0 grid grid-cols-2 gap-4 max-w-6xl mx-auto w-full">
+        {/* Saldo Total */}
+        <div className={`col-span-2 bg-white rounded-2xl shadow-sm p-4 outline outline-1 outline-gray-100 border-l-4 ${userTotalReceive - userTotalDebt >= 0 ? 'border-l-blue-500' : 'border-l-red-500'} flex items-center justify-between`}>
+          <div>
+            <p className="text-gray-500 text-xs font-semibold uppercase tracking-wide">Saldo Total</p>
+            <p className={`text-2xl font-bold mt-1 ${userTotalReceive - userTotalDebt > 0 ? 'text-blue-600' : (userTotalReceive - userTotalDebt < 0 ? 'text-red-600' : 'text-gray-900')}`}>
+              {formatCurrency(Math.abs(userTotalReceive - userTotalDebt))}
+              <span className="text-sm font-medium text-gray-400 ml-2">
+                {userTotalReceive - userTotalDebt > 0 ? '(A receber)' : (userTotalReceive - userTotalDebt < 0 ? '(Em débito)' : '')}
+              </span>
+            </p>
+          </div>
+        </div>
         <div className="bg-white rounded-2xl shadow-sm p-4 outline outline-1 outline-gray-100 border-l-4 border-l-red-500">
           <p className="text-gray-500 text-xs font-semibold uppercase tracking-wide">Você deve</p>
           <p className="text-xl font-bold text-red-600 mt-1">{formatCurrency(userTotalDebt)}</p>
@@ -155,19 +167,26 @@ export default function Dashboard() {
               if (balance === 0) return null;
               const member = groupMembers.find(m => m.id === parseInt(memberId));
               if (!member) return null;
-              
+
               const isReceiving = balance > 0;
               return (
-                <div key={memberId} className="flex items-center justify-between p-3 rounded-xl border border-gray-50 bg-gray-50/50">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold ${getAvatarColor(member.name)}`}>
-                      {getInitials(member.name)}
-                    </div>
-                    <span className="font-semibold text-gray-800">{member.name}</span>
+                <div key={memberId} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 transition-colors">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm ${getAvatarColor(member.name)}`}>
+                    {getInitials(member.name)}
                   </div>
-                  <div className={`font-bold ${isReceiving ? 'text-emerald-600' : 'text-red-600'}`}>
-                    {isReceiving ? `Te deve ${formatCurrency(balance)}` : `Você deve ${formatCurrency(Math.abs(balance))}`}
+
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-800 block truncate">{member.name}</p>
+                    <p className={`text-sm font-bold ${isReceiving ? 'text-emerald-600' : 'text-red-500'}`}>
+                      {isReceiving ? `Te deve ${formatCurrency(balance)}` : `Você deve ${formatCurrency(Math.abs(balance))}`}
+                    </p>
                   </div>
+
+                  {!isReceiving && (
+                    <button className="shrink-0 ml-1 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-full transition-colors shadow-sm active:scale-95 outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1">
+                      Pagar
+                    </button>
+                  )}
                 </div>
               );
             })}
