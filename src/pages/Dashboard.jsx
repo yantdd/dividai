@@ -90,7 +90,7 @@ function ModalConvidar({ onClose, onConfirmar }) {
 export default function Dashboard() {
   const navigate = useNavigate();
   const {
-    expenses, userTotalDebt, userTotalReceive,
+    expenses, userTotalDebt, userTotalReceive, userBalances,
     deleteExpense, groupMembers, selectedGroup, addMemberToGroup, removeMemberFromGroup
   } = useExpenses();
 
@@ -145,6 +145,35 @@ export default function Dashboard() {
           <p className="text-xl font-bold text-emerald-600 mt-1">{formatCurrency(userTotalReceive)}</p>
         </div>
       </div>
+
+      {/* Detalhes dos saldos */}
+      {(userTotalDebt > 0 || userTotalReceive > 0) && (
+        <div className="px-6 mt-5 shrink-0 max-w-6xl mx-auto w-full">
+          <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 flex flex-col gap-3">
+            <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">Saldos Individuais</p>
+            {Object.entries(userBalances).map(([memberId, balance]) => {
+              if (balance === 0) return null;
+              const member = groupMembers.find(m => m.id === parseInt(memberId));
+              if (!member) return null;
+              
+              const isReceiving = balance > 0;
+              return (
+                <div key={memberId} className="flex items-center justify-between p-3 rounded-xl border border-gray-50 bg-gray-50/50">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold ${getAvatarColor(member.name)}`}>
+                      {getInitials(member.name)}
+                    </div>
+                    <span className="font-semibold text-gray-800">{member.name}</span>
+                  </div>
+                  <div className={`font-bold ${isReceiving ? 'text-emerald-600' : 'text-red-600'}`}>
+                    {isReceiving ? `Te deve ${formatCurrency(balance)}` : `Você deve ${formatCurrency(Math.abs(balance))}`}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Seção de membros */}
       <div className="px-6 mt-5 shrink-0 max-w-6xl mx-auto w-full">

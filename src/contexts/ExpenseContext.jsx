@@ -248,23 +248,49 @@ export function ExpenseProvider({ children }) {
   // Membro local do usuário no grupo atual
   const userNesseGrupo = groupMembers.find(m => m.name.includes('Você'));
 
-  // Quanto o usuário deve: despesas pagas por OUTRO membro, parte do usuário
-  const userTotalDebt = !userNesseGrupo ? 0 : expenses.reduce((total, exp) => {
-    const usuarioPagou = exp.payerId === userNesseGrupo.id;
-    if (usuarioPagou) return total; // Não deve nada nessa conta — foi ele quem pagou
-    const userSplit = exp.split.find(s => s.memberId === userNesseGrupo.id);
-    return total + (userSplit ? userSplit.amount : 0);
-  }, 0);
+  const getBalances = () => {
+    if (!userNesseGrupo) return {};
+    
+    // balances armazenará o saldo de cada membro EM RELAÇÃO AO USUÁRIO
+    // chave: id do membro, valor: saldo (positivo = membro deve ao usuário, negativo = usuário deve ao membro)
+    const balances = {};
+    groupMembers.forEach(m => {
+      if (m.id !== userNesseGrupo.id) {
+        balances[m.id] = 0;
+      }
+    });
 
-  // Quanto o usuário recebe: despesas pagas POR ELE, parte dos outros membros
-  const userTotalReceive = !userNesseGrupo ? 0 : expenses.reduce((total, exp) => {
-    const usuarioPagou = exp.payerId === userNesseGrupo.id;
-    if (!usuarioPagou) return total; // Não recebe nada dessa conta
-    const othersSplit = exp.split
-      .filter(s => s.memberId !== userNesseGrupo.id)
-      .reduce((sum, s) => sum + s.amount, 0);
-    return total + othersSplit;
-  }, 0);
+    expenses.forEach(exp => {
+      if (exp.payerId === userNesseGrupo.id) {
+        // Usuário pagou: os outros devem a ele a parte deles
+        exp.split.forEach(s => {
+          if (s.memberId !== userNesseGrupo.id && balances[s.memberId] !== undefined) {
+            balances[s.memberId] += s.amount;
+          }
+        });
+      } else {
+        // Outro pagou: o usuário deve ao pagador a parte dele (do usuário)
+        const userSplit = exp.split.find(s => s.memberId === userNesseGrupo.id);
+        if (userSplit && balances[exp.payerId] !== undefined) {
+          balances[exp.payerId] -= userSplit.amount;
+        }
+      }
+    });
+
+    return balances;
+  };
+
+  const userBalances = getBalances();
+
+  let userTotalDebt = 0;
+  let userTotalReceive = 0;
+
+  if (userNesseGrupo) {
+    Object.values(userBalances).forEach(balance => {
+      if (balance > 0) userTotalReceive += balance;
+      else if (balance < 0) userTotalDebt += Math.abs(balance);
+    });
+  }
 
   return (
     <ExpenseContext.Provider value={{
@@ -287,7 +313,8 @@ export function ExpenseProvider({ children }) {
       updateExpense,
       getExpenseById,
       userTotalDebt,
-      userTotalReceive
+      userTotalReceive,
+      userBalances
     }}>
       {children}
     </ExpenseContext.Provider>
