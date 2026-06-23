@@ -5,10 +5,12 @@ import { useExpenses } from '../contexts/ExpenseContext';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { isLoggedIn, setIsLoggedIn, groups, createGroup, deleteGroup, setSelectedGroup } = useExpenses();
+  const { isLoggedIn, setIsLoggedIn, setUser, groups, createGroup, deleteGroup, setSelectedGroup } = useExpenses();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Controle do formulário inline de novo grupo
   const [criandoGrupo, setCriandoGrupo] = useState(false);
@@ -17,10 +19,33 @@ export default function Login() {
   // Controle do modal de exclusão de grupo
   const [grupoParaDeletar, setGrupoParaDeletar] = useState(null);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setErrorMsg('');
     if (email && password) {
-      setIsLoggedIn(true);
+      setLoading(true);
+      try {
+        const response = await fetch('http://localhost:3000/api/users/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Erro ao fazer login');
+        }
+
+        setUser(data.user);
+        setIsLoggedIn(true);
+      } catch (err) {
+        setErrorMsg(err.message);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -217,13 +242,27 @@ export default function Login() {
             </div>
           </div>
 
+          {/* Mensagem de erro */}
+          {errorMsg && (
+            <p className="text-sm text-red-500 font-medium bg-red-50 px-4 py-2 rounded-xl border border-red-100">
+              {errorMsg}
+            </p>
+          )}
+
           <div className="pt-4">
             <button
               type="submit"
-              className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl shadow-md text-white bg-teal-600 hover:bg-teal-700 hover:shadow-lg font-semibold transition-all active:scale-95"
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl shadow-md text-white bg-teal-600 hover:bg-teal-700 hover:shadow-lg font-semibold transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              <LogIn size={20} />
-              Entrar
+              {loading ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                <>
+                  <LogIn size={20} />
+                  Entrar
+                </>
+              )}
             </button>
           </div>
         </form>

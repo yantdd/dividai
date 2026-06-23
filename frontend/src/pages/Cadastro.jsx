@@ -14,7 +14,7 @@ export default function Cadastro() {
   const [sucesso, setSucesso] = useState(false);
   const [erroCampo, setErroCampo] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErroCampo('');
 
@@ -29,16 +29,32 @@ export default function Cadastro() {
 
     setLoading(true);
 
-    // Simula uma chamada de API de cadastro
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const response = await fetch('http://localhost:3000/api/users/cadastrar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: nome, email, password: senha }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao criar conta');
+      }
+
       setSucesso(true);
 
       // Após 1.8s mostrando o sucesso, redireciona para o login
       setTimeout(() => {
         navigate('/');
       }, 1800);
-    }, 1500);
+    } catch (err) {
+      setErroCampo(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -152,8 +168,8 @@ export default function Cadastro() {
                     onChange={(e) => setConfirmarSenha(e.target.value)}
                     placeholder="Repita a senha"
                     className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border rounded-xl focus:bg-white focus:outline-none focus:ring-2 transition-all text-gray-800 ${erroCampo
-                        ? 'border-red-400 focus:ring-red-300'
-                        : 'border-gray-200 focus:ring-teal-500'
+                      ? 'border-red-400 focus:ring-red-300'
+                      : 'border-gray-200 focus:ring-teal-500'
                       }`}
                   />
                 </div>

@@ -12,7 +12,7 @@ export function ExpenseProvider({ children }) {
 
   const [selectedGroup, setSelectedGroup] = useState(null);
 
-  const [user, setUser] = useState({ id: 1, name: 'João Silva', email: 'joao.silva@email.com' });
+  const [user, setUser] = useState(null);
 
   // Membros por grupo — cada membro tem um groupId
   const [allGroupMembers, setAllGroupMembers] = useState([
@@ -302,6 +302,7 @@ export function ExpenseProvider({ children }) {
       selectedGroup,
       setSelectedGroup,
       user,
+      setUser,
       updateUser,
       groupMembers,
       addMemberToGroup,
