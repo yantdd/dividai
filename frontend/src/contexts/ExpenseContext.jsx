@@ -1,102 +1,135 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const ExpenseContext = createContext({});
 
 export function ExpenseProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const [groups, setGroups] = useState([
-    { id: 1, name: 'República Toca do Urso' },
-    { id: 2, name: 'Churrasco da Turma' },
-  ]);
+  const [groups, setGroups] = useState([]);
 
   const [selectedGroup, setSelectedGroup] = useState(null);
 
   const [user, setUser] = useState(null);
 
+  // Busca grupos quando o usuário loga
+  useEffect(() => {
+    if (user) {
+      fetch(`http://localhost:3000/api/groups/user/${user.id}`)
+        .then(res => res.json())
+        .then(data => setGroups(data))
+        .catch(err => console.error("Erro ao buscar grupos:", err));
+    } else {
+      setGroups([]);
+    }
+  }, [user]);
+
   // Membros por grupo — cada membro tem um groupId
-  const [allGroupMembers, setAllGroupMembers] = useState([
-    { id: 1, groupId: 1, name: 'João (Você)' },
-    { id: 2, groupId: 1, name: 'Maria' },
-    { id: 3, groupId: 1, name: 'Pedro' },
-    { id: 4, groupId: 2, name: 'João (Você)' },
-    { id: 5, groupId: 2, name: 'Ana' },
-    { id: 6, groupId: 2, name: 'Carlos' },
-    { id: 7, groupId: 2, name: 'Lucas' },
-  ]);
+  const [allGroupMembers, setAllGroupMembers] = useState([]);
+
+  // Busca membros quando seleciona um grupo
+  useEffect(() => {
+    if (selectedGroup) {
+      fetch(`http://localhost:3000/api/groups/${selectedGroup.id}/members`)
+        .then(res => res.json())
+        .then(data => {
+          setAllGroupMembers(prev => {
+            const others = prev.filter(m => m.groupId !== selectedGroup.id);
+            return [...others, ...data];
+          });
+        })
+        .catch(err => console.error("Erro ao buscar membros:", err));
+    }
+  }, [selectedGroup]);
+
 
   // Membros do grupo atual
   const groupMembers = selectedGroup
     ? allGroupMembers.filter(m => m.groupId === selectedGroup.id)
     : [];
 
-  const addMemberToGroup = (email) => {
+  const addMemberToGroup = async (email) => {
     if (!selectedGroup) return;
 
     // Extrai um nome fictício a partir do e-mail (parte antes do @)
     const nomeFicticio = email.split('@')[0]
       .split('.').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
 
-    const newId = allGroupMembers.length
-      ? Math.max(...allGroupMembers.map(m => m.id)) + 1
-      : 1;
+    try {
+      const res = await fetch(`http://localhost:3000/api/groups/${selectedGroup.id}/members`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: nomeFicticio })
+      });
+      if (!res.ok) throw new Error("Erro ao adicionar membro");
+      const novoMembro = await res.json();
 
-    // Membros atuais do grupo (antes de adicionar o novo)
-    const membrosAtuais = allGroupMembers.filter(m => m.groupId === selectedGroup.id);
-    const totalMembros = membrosAtuais.length + 1; // inclui o novo
+      const newId = novoMembro.id;
 
-    // Redistribui igualmente os splits de todas as despesas do grupo
-    setAllExpenses(prev => prev.map(exp => {
-      if (exp.groupId !== selectedGroup.id) return exp;
+      // Membros atuais do grupo (antes de adicionar o novo)
+      const membrosAtuais = allGroupMembers.filter(m => m.groupId === selectedGroup.id);
+      const totalMembros = membrosAtuais.length + 1; // inclui o novo
 
-      const novaPorcao = exp.amount / totalMembros;
-      const novoSplit = [
-        // Atualiza os membros existentes com o novo valor
-        ...membrosAtuais.map(m => ({ memberId: m.id, amount: novaPorcao })),
-        // Adiciona o novo membro
-        { memberId: newId, amount: novaPorcao },
-      ];
-
-      return { ...exp, split: novoSplit };
-    }));
-
-    // Insere o novo membro na lista
-    setAllGroupMembers(prev => [
-      ...prev,
-      { id: newId, groupId: selectedGroup.id, name: nomeFicticio }
-    ]);
-  };
-
-  const removeMemberFromGroup = (memberId) => {
-    if (!selectedGroup) return;
-
-    // Opcional: Redistribui as despesas apenas entre os membros remanescentes
-    const membrosRestantes = allGroupMembers.filter(
-      m => m.groupId === selectedGroup.id && m.id !== memberId
-    );
-
-    if (membrosRestantes.length > 0) {
+      // Redistribui igualmente os splits de todas as despesas do grupo
       setAllExpenses(prev => prev.map(exp => {
         if (exp.groupId !== selectedGroup.id) return exp;
 
-        const novaPorcao = exp.amount / membrosRestantes.length;
-        const novoSplit = membrosRestantes.map(m => ({
-          memberId: m.id, amount: novaPorcao
-        }));
+        const novaPorcao = exp.amount / totalMembros;
+        const novoSplit = [
+          // Atualiza os membros existentes com o novo valor
+          ...membrosAtuais.map(m => ({ memberId: m.id, amount: novaPorcao })),
+          // Adiciona o novo membro
+          { memberId: newId, amount: novaPorcao },
+        ];
 
-        let newPayerId = exp.payerId;
-        if (newPayerId === memberId) {
-          newPayerId = membrosRestantes[0].id;
-        }
-
-        return { ...exp, split: novoSplit, payerId: newPayerId };
+        return { ...exp, split: novoSplit };
       }));
-    } else {
-      // Deleta as contas se não houver mais ninguém
-      setAllExpenses(prev => prev.filter(e => e.groupId !== selectedGroup.id));
-    }
 
-    setAllGroupMembers(prev => prev.filter(m => m.id !== memberId));
+      // Insere o novo membro na lista
+      setAllGroupMembers(prev => [...prev, novoMembro]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const removeMemberFromGroup = async (memberId) => {
+    if (!selectedGroup) return;
+
+    try {
+      const res = await fetch(`http://localhost:3000/api/groups/members/${memberId}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) throw new Error("Erro ao remover membro");
+
+      // Opcional: Redistribui as despesas apenas entre os membros remanescentes
+      const membrosRestantes = allGroupMembers.filter(
+        m => m.groupId === selectedGroup.id && m.id !== memberId
+      );
+
+      if (membrosRestantes.length > 0) {
+        setAllExpenses(prev => prev.map(exp => {
+          if (exp.groupId !== selectedGroup.id) return exp;
+
+          const novaPorcao = exp.amount / membrosRestantes.length;
+          const novoSplit = membrosRestantes.map(m => ({
+            memberId: m.id, amount: novaPorcao
+          }));
+
+          let newPayerId = exp.payerId;
+          if (newPayerId === memberId) {
+            newPayerId = membrosRestantes[0].id;
+          }
+
+          return { ...exp, split: novoSplit, payerId: newPayerId };
+        }));
+      } else {
+        // Deleta as contas se não houver mais ninguém
+        setAllExpenses(prev => prev.filter(e => e.groupId !== selectedGroup.id));
+      }
+
+      setAllGroupMembers(prev => prev.filter(m => m.id !== memberId));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const updateUser = (data) => {
@@ -107,100 +140,46 @@ export function ExpenseProvider({ children }) {
   };
 
   // Cria um novo grupo e automaticamente adiciona o usuário atual como membro
-  const createGroup = (nome) => {
-    const newGroupId = groups.length ? Math.max(...groups.map(g => g.id)) + 1 : 1;
-    const newMemberId = allGroupMembers.length ? Math.max(...allGroupMembers.map(m => m.id)) + 1 : 1;
-    setGroups(prev => [...prev, { id: newGroupId, name: nome }]);
-    setAllGroupMembers(prev => [...prev, { id: newMemberId, groupId: newGroupId, name: 'João (Você)' }]);
+  const createGroup = async (nome) => {
+    if (!user) return;
+    try {
+      const response = await fetch('http://localhost:3000/api/groups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: nome, ownerId: user.id })
+      });
+      if (!response.ok) throw new Error("Falha ao criar grupo");
+      const newGroup = await response.json();
+      
+      setGroups(prev => [...prev, newGroup]);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Remove o grupo e todos os dados associados (membros + despesas)
-  const deleteGroup = (groupId) => {
-    setGroups(prev => prev.filter(g => g.id !== groupId));
-    setAllGroupMembers(prev => prev.filter(m => m.groupId !== groupId));
-    setAllExpenses(prev => prev.filter(e => e.groupId !== groupId));
-    // Se o grupo deletado era o selecionado, limpa a seleção
-    if (selectedGroup && selectedGroup.id === groupId) {
-      setSelectedGroup(null);
+  const deleteGroup = async (groupId) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/groups/${groupId}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) throw new Error("Falha ao deletar grupo");
+
+      setGroups(prev => prev.filter(g => g.id !== groupId));
+      setAllGroupMembers(prev => prev.filter(m => m.groupId !== groupId));
+      setAllExpenses(prev => prev.filter(e => e.groupId !== groupId));
+      // Se o grupo deletado era o selecionado, limpa a seleção
+      if (selectedGroup && selectedGroup.id === groupId) {
+        setSelectedGroup(null);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
   // Despesas por grupo
-  const [allExpenses, setAllExpenses] = useState([
-    {
-      id: "1",
-      groupId: 1,
-      title: 'Mercado Mensal',
-      amount: 350.0,
-      date: '12/04/2026',
-      payerId: 2,
-      receipt: null,
-      split: [
-        { memberId: 1, amount: 116.66 },
-        { memberId: 2, amount: 116.67 },
-        { memberId: 3, amount: 116.67 },
-      ]
-    },
-    {
-      id: "2",
-      groupId: 1,
-      title: 'Conta de Internet',
-      amount: 150.0,
-      date: '10/04/2026',
-      payerId: 1,
-      receipt: null,
-      split: [
-        { memberId: 1, amount: 50.0 },
-        { memberId: 2, amount: 50.0 },
-        { memberId: 3, amount: 50.0 },
-      ]
-    },
-    {
-      id: "3",
-      groupId: 2,
-      title: 'Carne e Linguiça',
-      amount: 280.0,
-      date: '11/04/2026',
-      payerId: 4,
-      receipt: null,
-      split: [
-        { memberId: 4, amount: 70.0 },
-        { memberId: 5, amount: 70.0 },
-        { memberId: 6, amount: 70.0 },
-        { memberId: 7, amount: 70.0 },
-      ]
-    },
-    {
-      id: "4",
-      groupId: 2,
-      title: 'Carvão e Descartáveis',
-      amount: 85.0,
-      date: '11/04/2026',
-      payerId: 6,
-      receipt: null,
-      split: [
-        { memberId: 4, amount: 21.25 },
-        { memberId: 5, amount: 21.25 },
-        { memberId: 6, amount: 21.25 },
-        { memberId: 7, amount: 21.25 },
-      ]
-    },
-    {
-      id: "5",
-      groupId: 2,
-      title: 'Bebidas e Gelo',
-      amount: 120.0,
-      date: '11/04/2026',
-      payerId: 5,
-      receipt: null,
-      split: [
-        { memberId: 4, amount: 30.0 },
-        { memberId: 5, amount: 30.0 },
-        { memberId: 6, amount: 30.0 },
-        { memberId: 7, amount: 30.0 },
-      ]
-    },
-  ]);
+  const [allExpenses, setAllExpenses] = useState([]);
+
 
   const expenses = selectedGroup
     ? allExpenses.filter(e => e.groupId === selectedGroup.id)

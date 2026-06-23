@@ -12,6 +12,7 @@ export async function cadastrarUsuario(req, res) {
                 id: newUser.id,
                 name: newUser.name,
                 email: newUser.email,
+                photo: newUser.photo,
             }
         });
     } catch (error) {
@@ -33,6 +34,7 @@ export async function login(req, res) {
                 id: user.id,
                 name: user.name,
                 email: user.email,
+                photo: user.photo,
             },
         });
     } catch (error) {
