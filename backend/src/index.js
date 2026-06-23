@@ -5,8 +5,11 @@ import sequelize, { connectDB } from "./db.js";
 import User from "./models/User.js";
 import Group from "./models/Group.js";
 import GroupMember from "./models/GroupMember.js";
+import Expense from "./models/Expense.js";
+import ExpenseSplit from "./models/ExpenseSplit.js";
 import userRoutes from "./routes/userRoutes.js";
 import groupRoutes from "./routes/groupRoutes.js";
+import expenseRoutes from "./routes/expenseRoutes.js";
 
 dotenv.config();
 
@@ -19,6 +22,7 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 app.use('/api/users', userRoutes);
 app.use('/api/groups', groupRoutes);
+app.use('/api/expenses', expenseRoutes);
 
 app.get('/', (req, res) => {
     res.send('Backend running!!!');
@@ -36,6 +40,19 @@ const startServer = async () => {
 
     User.hasMany(GroupMember, { foreignKey: 'userId' });
     GroupMember.belongsTo(User, { foreignKey: 'userId' });
+
+    // Associações de Expense
+    Group.hasMany(Expense, { foreignKey: 'groupId', onDelete: 'CASCADE' });
+    Expense.belongsTo(Group, { foreignKey: 'groupId' });
+
+    GroupMember.hasMany(Expense, { foreignKey: 'payerId' });
+    Expense.belongsTo(GroupMember, { foreignKey: 'payerId' });
+
+    Expense.hasMany(ExpenseSplit, { foreignKey: 'expenseId', onDelete: 'CASCADE' });
+    ExpenseSplit.belongsTo(Expense, { foreignKey: 'expenseId' });
+
+    GroupMember.hasMany(ExpenseSplit, { foreignKey: 'memberId' });
+    ExpenseSplit.belongsTo(GroupMember, { foreignKey: 'memberId' });
 
     try {
         await sequelize.sync({ alter: true });

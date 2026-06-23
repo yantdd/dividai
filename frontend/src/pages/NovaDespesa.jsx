@@ -39,21 +39,18 @@ export default function NovaDespesa() {
     }, 2000);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!amount) return;
-    
+
     setLoading(true);
-    
-    // Pequeno delay para passar textura visual de salvar
-    setTimeout(() => {
-      addExpense({ 
-        title: title || 'Despesa Indefinida', 
-        amount, 
-        payerId 
-      });
-      navigate('/dashboard');
-    }, 500);
+
+    await addExpense({
+      title: title || 'Despesa Indefinida',
+      amount,
+      payerId
+    });
+    navigate('/dashboard');
   };
 
   return (

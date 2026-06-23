@@ -105,10 +105,10 @@ export default function Dashboard() {
     return member ? member.name.replace(' (Você)', '') : 'Desconhecido';
   };
 
-  const handleDelete = (e, id) => {
+  const handleDelete = async (e, id) => {
     e.preventDefault();
     e.stopPropagation();
-    deleteExpense(id);
+    await deleteExpense(id);
   };
 
   const handleConvidar = (email) => {

@@ -36,12 +36,11 @@ export default function DespesaDetalhes() {
   // Pagador em vigor (ao editar usa o estado local; ao visualizar usa o salvo)
   const currentPayerId = isEditing ? editedPayerId : expense.payerId;
 
-  const handleEditToggle = () => {
+  const handleEditToggle = async () => {
     if (isEditing) {
-      updateExpense(expense.id, { split: editedSplit, payerId: editedPayerId });
+      await updateExpense(expense.id, { split: editedSplit, payerId: editedPayerId });
       setIsEditing(false);
     } else {
-      // Reseta o estado de edição para os valores atuais
       setEditedSplit(expense.split);
       setEditedPayerId(expense.payerId);
       setIsEditing(true);
