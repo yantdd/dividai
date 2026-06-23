@@ -41,3 +41,26 @@ export async function login(req, res) {
         });
     }
 }
+
+export async function updateUser(req, res) {
+    try {
+        const { id } = req.params;
+        const data = req.body;
+
+        const updatedUser = await userService.updateUserService(id, data);
+
+        return res.status(200).json({
+            message: 'Perfil atualizado com sucesso!',
+            user: {
+                id: updatedUser.id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                photo: updatedUser.photo,
+            },
+        });
+    } catch (error) {
+        return res.status(400).json({
+            error: error.message
+        });
+    }
+}

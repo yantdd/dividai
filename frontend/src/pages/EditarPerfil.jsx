@@ -16,26 +16,44 @@ export default function EditarPerfil() {
   const [sucesso, setSucesso] = useState(false);
   const [erroCampo, setErroCampo] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErroCampo('');
 
-    if (senha !== confirmarSenha) {
+    if (senha && senha !== confirmarSenha) {
       setErroCampo('As senhas não coincidem.');
       return;
     }
 
     setLoading(true);
 
-    setTimeout(() => {
-      setLoading(false);
-      updateUser({ name: nome, email });
+    try {
+      const response = await fetch(`http://localhost:3000/api/users/${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Envia a senha apenas se ela foi preenchida
+        body: JSON.stringify({ name: nome, email, ...(senha && { password: senha }) }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao atualizar perfil');
+      }
+
+      updateUser(data.user);
       setSucesso(true);
 
       setTimeout(() => {
         navigate(-1);
       }, 1500);
-    }, 1200);
+    } catch (err) {
+      setErroCampo(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -5,5 +5,6 @@ const router = Router();
 
 router.post('/cadastrar', userController.cadastrarUsuario);
 router.post('/login', userController.login);
+router.put('/:id', userController.updateUser);
 
 export default router;

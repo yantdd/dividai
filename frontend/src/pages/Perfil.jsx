@@ -22,7 +22,7 @@ function Toggle({ enabled, onToggle }) {
 
 export default function Perfil() {
   const navigate = useNavigate();
-  const { setIsLoggedIn, user } = useExpenses();
+  const { setIsLoggedIn, user, updateUser } = useExpenses();
 
   // Configuração visual (apenas estado local, sem lógica real)
   const [modoEscuro, setModoEscuro] = useState(false);
@@ -52,10 +52,14 @@ export default function Perfil() {
       <div className="flex-1 overflow-y-auto pb-8 w-full max-w-3xl mx-auto custom-scroll">
         {/* Seção de Foto e Dados do Usuário */}
         <div className="bg-white rounded-2xl mx-6 mt-6 px-6 pt-8 pb-6 flex flex-col items-center shadow-sm">
-          {/* Avatar Placeholder */}
+          {/* Avatar */}
           <div className="relative w-24 h-24 mb-4">
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-teal-400 to-teal-700 flex items-center justify-center shadow-lg shadow-teal-200 overflow-hidden relative group">
-              <UserCircle2 size={56} className="text-white opacity-90" />
+              {user?.photo ? (
+                <img src={user.photo} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <UserCircle2 size={56} className="text-white opacity-90" />
+              )}
             </div>
             {/* Indicador de online */}
             <span className="absolute top-1 right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white" />
@@ -66,8 +70,29 @@ export default function Perfil() {
                 const input = document.createElement('input');
                 input.type = 'file';
                 input.accept = 'image/*';
-                input.onchange = () => {
-                  alert('Funcionalidade de upload de foto simulada com sucesso!');
+                input.onchange = (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+
+                  const reader = new FileReader();
+                  reader.onload = async (event) => {
+                    const base64Photo = event.target.result;
+                    try {
+                      const response = await fetch(`http://localhost:3000/api/users/${user.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ photo: base64Photo }),
+                      });
+
+                      const data = await response.json();
+                      if (!response.ok) throw new Error(data.error);
+
+                      updateUser({ photo: data.user.photo });
+                    } catch (err) {
+                      alert('Erro ao atualizar foto: ' + err.message);
+                    }
+                  };
+                  reader.readAsDataURL(file);
                 };
                 input.click();
               }}
