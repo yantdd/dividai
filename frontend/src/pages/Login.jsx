@@ -1,11 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Mail, Lock, LogIn, Plus, ChevronRight, UserCircle2, Check, X, Trash2, LogOut as LogOutIcon } from 'lucide-react';
 import { useExpenses } from '../contexts/ExpenseContext';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { isLoggedIn, loginUser, logoutUser, user, groups, createGroup, deleteGroup, leaveGroup, setSelectedGroup } = useExpenses();
+  const { isLoggedIn, loginUser, logoutUser, user, groups, createGroup, deleteGroup, leaveGroup, setSelectedGroup, refreshGroups } = useExpenses();
+
+  useEffect(() => {
+    if (isLoggedIn) refreshGroups();
+  }, [isLoggedIn]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

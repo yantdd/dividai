@@ -1,11 +1,15 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Camera, Loader2, DollarSign, Upload, X } from 'lucide-react';
 import { useExpenses } from '../contexts/ExpenseContext';
 
 export default function NovaDespesa() {
   const navigate = useNavigate();
-  const { addExpense, groupMembers } = useExpenses();
+  const { addExpense, groupMembers, selectedGroup } = useExpenses();
+
+  useEffect(() => {
+    if (!selectedGroup) navigate('/', { replace: true });
+  }, [selectedGroup]);
 
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState('');

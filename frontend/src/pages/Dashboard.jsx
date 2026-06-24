@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Receipt, ArrowLeft, Trash2, UserCircle2, UserPlus, X } from 'lucide-react';
 import { useExpenses } from '../contexts/ExpenseContext';
@@ -15,7 +15,6 @@ function getAvatarColor(name) {
 
 function getInitials(name) {
   return name
-    .replace(' (Você)', '')
     .split(' ')
     .map(p => p[0])
     .slice(0, 2)
@@ -103,8 +102,10 @@ export default function Dashboard() {
   const {
     expenses, userTotalDebt, userTotalReceive, userBalances,
     deleteExpense, groupMembers, selectedGroup, addMemberToGroup, removeMemberFromGroup,
-    user, settleDebt
+    user, settleDebt, refreshExpenses
   } = useExpenses();
+
+  useEffect(() => { refreshExpenses(); }, []);
 
   const [modalAberto, setModalAberto] = useState(false);
   const [membroParaDeletar, setMembroParaDeletar] = useState(null);
@@ -112,12 +113,18 @@ export default function Dashboard() {
 
   const isOwner = selectedGroup && user && selectedGroup.ownerId === user.id;
 
+  useEffect(() => {
+    if (!selectedGroup) navigate('/', { replace: true });
+  }, [selectedGroup]);
+
+  if (!selectedGroup) return null;
+
   const formatCurrency = (value) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
   const getPayerName = (id) => {
     const member = groupMembers.find(m => m.id === id);
-    return member ? member.name.replace(' (Você)', '') : 'Desconhecido';
+    return member ? member.name : 'Desconhecido';
   };
 
   const handleDelete = async (e, id) => {
@@ -249,7 +256,7 @@ export default function Dashboard() {
           ) : (
             <div className="flex flex-wrap gap-3">
               {groupMembers.map(member => {
-                const isCurrentUser = member.name.includes('(Você)');
+                const isCurrentUser = member.userId === user?.id;
                 return (
                   <div key={member.id} className="relative flex flex-col items-center gap-1 group/member">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm ${getAvatarColor(member.name)} relative`}>
@@ -264,7 +271,7 @@ export default function Dashboard() {
                       )}
                     </div>
                     <span className="text-xs text-gray-500 max-w-[52px] truncate text-center">
-                      {isCurrentUser ? member.name.replace(' (Você)', ' ★') : member.name}
+                      {isCurrentUser ? `${member.name} ★` : member.name}
                     </span>
                   </div>
                 );

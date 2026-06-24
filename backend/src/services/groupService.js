@@ -11,7 +11,7 @@ export async function createGroupService(name, ownerId) {
     const owner = await User.findByPk(ownerId);
     if (owner) {
         await GroupMember.create({
-            name: `${owner.name} (Você)`,
+            name: owner.name,
             groupId: newGroup.id,
             userId: owner.id
         });

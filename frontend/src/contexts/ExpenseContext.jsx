@@ -40,12 +40,18 @@ export function ExpenseProvider({ children }) {
     setAllExpenses([]);
   };
 
-  useEffect(() => {
+  const refreshGroups = () => {
     if (user) {
       fetch(`${API}/api/groups/user/${user.id}`, { headers: authHeaders() })
         .then(res => res.json())
         .then(data => setGroups(data))
         .catch(err => console.error("Erro ao buscar grupos:", err));
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      refreshGroups();
     } else {
       setGroups([]);
     }
@@ -71,30 +77,35 @@ export function ExpenseProvider({ children }) {
     ? allGroupMembers.filter(m => m.groupId === selectedGroup.id)
     : [];
 
+  const refreshExpenses = () => {
+    if (!selectedGroup) return;
+    fetch(`${API}/api/expenses/group/${selectedGroup.id}`, { headers: authHeaders() })
+      .then(res => res.json())
+      .then(data => {
+        const formatted = data.map(exp => ({
+          id: exp.id.toString(),
+          groupId: exp.groupId,
+          title: exp.title,
+          amount: exp.amount,
+          payerId: exp.payerId,
+          date: exp.date,
+          receipt: exp.receipt || null,
+          split: exp.ExpenseSplits.map(s => ({
+            memberId: s.memberId,
+            amount: s.amount
+          }))
+        }));
+        setAllExpenses(prev => {
+          const others = prev.filter(e => e.groupId !== selectedGroup.id);
+          return [...others, ...formatted];
+        });
+      })
+      .catch(err => console.error("Erro ao buscar despesas:", err));
+  };
+
   useEffect(() => {
     if (selectedGroup) {
-      fetch(`${API}/api/expenses/group/${selectedGroup.id}`, { headers: authHeaders() })
-        .then(res => res.json())
-        .then(data => {
-          const formatted = data.map(exp => ({
-            id: exp.id.toString(),
-            groupId: exp.groupId,
-            title: exp.title,
-            amount: exp.amount,
-            payerId: exp.payerId,
-            date: exp.date,
-            receipt: exp.receipt || null,
-            split: exp.ExpenseSplits.map(s => ({
-              memberId: s.memberId,
-              amount: s.amount
-            }))
-          }));
-          setAllExpenses(prev => {
-            const others = prev.filter(e => e.groupId !== selectedGroup.id);
-            return [...others, ...formatted];
-          });
-        })
-        .catch(err => console.error("Erro ao buscar despesas:", err));
+      refreshExpenses();
     }
   }, [selectedGroup]);
 
@@ -198,7 +209,7 @@ export function ExpenseProvider({ children }) {
     setUser(updated);
     localStorage.setItem('user', JSON.stringify(updated));
     if (data.name) {
-      setAllGroupMembers(prev => prev.map(m => m.name.includes('(Você)') ? { ...m, name: `${data.name} (Você)` } : m));
+      setAllGroupMembers(prev => prev.map(m => m.userId === user?.id ? { ...m, name: data.name } : m));
     }
   };
 
@@ -276,7 +287,7 @@ export function ExpenseProvider({ children }) {
       amount: splitAmount
     }));
 
-    const userNesseGrupo = membrosAtivos.find(m => m.name.includes('Você'));
+    const userNesseGrupo = membrosAtivos.find(m => m.userId === user?.id);
 
     const formData = new FormData();
     formData.append('groupId', selectedGroup.id);
@@ -398,7 +409,7 @@ export function ExpenseProvider({ children }) {
 
   const getExpenseById = (id) => allExpenses.find(e => e.id === id);
 
-  const userNesseGrupo = groupMembers.find(m => m.name.includes('Você'));
+  const userNesseGrupo = groupMembers.find(m => m.userId === user?.id);
 
   const getBalances = () => {
     if (!userNesseGrupo) return {};
@@ -465,6 +476,8 @@ export function ExpenseProvider({ children }) {
       updateExpense,
       getExpenseById,
       settleDebt,
+      refreshGroups,
+      refreshExpenses,
       userTotalDebt,
       userTotalReceive,
       userBalances

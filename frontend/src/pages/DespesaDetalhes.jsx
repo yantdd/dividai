@@ -8,7 +8,13 @@ const API = import.meta.env.VITE_API_URL;
 export default function DespesaDetalhes() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getExpenseById, groupMembers, user, updateExpense } = useExpenses();
+  const { getExpenseById, groupMembers, user, updateExpense, selectedGroup } = useExpenses();
+
+  const isCurrentMember = (member) => member.userId === user?.id;
+
+  useEffect(() => {
+    if (!selectedGroup) navigate('/', { replace: true });
+  }, [selectedGroup]);
 
   const expense = getExpenseById(id);
 
@@ -157,7 +163,7 @@ export default function DespesaDetalhes() {
                           : 'bg-white text-gray-600 border-gray-200 hover:border-amber-400 hover:text-amber-700'
                       }`}
                     >
-                      {member.name.replace(' (Você)', ' ★')}
+                      {isCurrentMember(member) ? `${member.name} ★` : member.name}
                     </button>
                   ))}
                 </div>
