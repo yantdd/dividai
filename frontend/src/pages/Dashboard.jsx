@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Receipt, ArrowLeft, Trash2, UserCircle2, UserPlus, X } from 'lucide-react';
 import { useExpenses } from '../contexts/ExpenseContext';
 
-// Gera uma cor de fundo para o avatar a partir do nome (determinística)
 function getAvatarColor(name) {
   const cores = [
     'bg-teal-500', 'bg-amber-500', 'bg-emerald-500',
@@ -24,7 +23,6 @@ function getInitials(name) {
     .toUpperCase();
 }
 
-// Modal de Convidar Membro
 function ModalConvidar({ onClose, onConfirmar }) {
   const [email, setEmail] = useState('');
 
@@ -35,12 +33,10 @@ function ModalConvidar({ onClose, onConfirmar }) {
   };
 
   return (
-    // Fundo escuro semi-transparente
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      {/* Painel do modal — centrado em todas as telas para evitar bugs no mobile */}
       <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold text-gray-900">Adicionar novo membro</h2>
@@ -91,11 +87,13 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const {
     expenses, userTotalDebt, userTotalReceive, userBalances,
-    deleteExpense, groupMembers, selectedGroup, addMemberToGroup, removeMemberFromGroup
+    deleteExpense, groupMembers, selectedGroup, addMemberToGroup, removeMemberFromGroup,
+    user, settleDebt
   } = useExpenses();
 
   const [modalAberto, setModalAberto] = useState(false);
   const [membroParaDeletar, setMembroParaDeletar] = useState(null);
+  const [membroParaPagar, setMembroParaPagar] = useState(null);
 
   const formatCurrency = (value) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -116,6 +114,12 @@ export default function Dashboard() {
     setModalAberto(false);
   };
 
+  const handleConfirmarPagamento = async () => {
+    if (!membroParaPagar) return;
+    await settleDebt(membroParaPagar.id, membroParaPagar.amount);
+    setMembroParaPagar(null);
+  };
+
   return (
     <div className="flex flex-col flex-1 bg-gray-50 pb-24">
       {/* Cabeçalho */}
@@ -128,8 +132,12 @@ export default function Dashboard() {
             <h1 className="text-xl font-bold">{selectedGroup ? selectedGroup.name : 'Meu Grupo'}</h1>
             <p className="opacity-80 text-sm mt-1">Resumo Financeiro</p>
           </div>
-          <button onClick={() => navigate('/perfil')} className="p-2 text-teal-100 hover:text-white transition-colors rounded-full hover:bg-teal-500">
-            <UserCircle2 size={28} />
+          <button onClick={() => navigate('/perfil')} className="p-1 rounded-full hover:bg-teal-500 transition-colors">
+            {user?.photo ? (
+              <img src={user.photo} alt="Perfil" className="w-9 h-9 rounded-full object-cover border-2 border-teal-300" />
+            ) : (
+              <UserCircle2 size={28} className="text-teal-100 hover:text-white" />
+            )}
           </button>
         </div>
       </header>
@@ -183,7 +191,10 @@ export default function Dashboard() {
                   </div>
 
                   {!isReceiving && (
-                    <button className="shrink-0 ml-1 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-full transition-colors shadow-sm active:scale-95 outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1">
+                    <button
+                      onClick={() => setMembroParaPagar({ id: parseInt(memberId), name: member.name, amount: Math.abs(balance) })}
+                      className="shrink-0 ml-1 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-full transition-colors shadow-sm active:scale-95 outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
+                    >
                       Pagar
                     </button>
                   )}
@@ -243,7 +254,7 @@ export default function Dashboard() {
       </div>
 
       {/* Lista de despesas */}
-      <div className="flex-1 p-6 mt-2 overflow-y-auto max-w-6xl mx-auto w-full w-full custom-scroll">
+      <div className="flex-1 p-6 mt-2 overflow-y-auto max-w-6xl mx-auto w-full custom-scroll">
         <h2 className="font-semibold text-gray-800 mb-4">Despesas Recentes</h2>
 
         {expenses.length === 0 ? (
@@ -298,6 +309,32 @@ export default function Dashboard() {
           onClose={() => setModalAberto(false)}
           onConfirmar={handleConvidar}
         />
+      )}
+
+      {/* Modal de confirmar pagamento */}
+      {membroParaPagar && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Confirmar Pagamento</h3>
+            <p className="text-gray-600 mb-6 font-medium text-sm">
+              Deseja registrar o pagamento de <span className="font-bold text-teal-600">{formatCurrency(membroParaPagar.amount)}</span> para <span className="font-bold text-gray-900">"{membroParaPagar.name}"</span>?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setMembroParaPagar(null)}
+                className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmarPagamento}
+                className="flex-1 py-3 rounded-xl bg-teal-600 text-white font-semibold hover:bg-teal-700 transition-colors active:scale-95"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Modal de remover membro */}

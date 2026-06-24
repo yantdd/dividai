@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth.js';
+import upload from '../middleware/upload.js';
 import {
     createExpense,
     getExpensesByGroup,
@@ -13,7 +14,7 @@ const router = Router();
 
 router.use(authMiddleware);
 
-router.post('/', createExpense);
+router.post('/', upload.single('receipt'), createExpense);
 router.get('/group/:groupId', getExpensesByGroup);
 router.put('/group/:groupId/recalculate', recalculateSplits);
 router.get('/:id', getExpenseById);

@@ -1,31 +1,10 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Moon, LogOut, UserCircle2, ChevronRight, Camera } from 'lucide-react';
+import { ArrowLeft, LogOut, UserCircle2, ChevronRight, Camera } from 'lucide-react';
 import { useExpenses } from '../contexts/ExpenseContext';
-
-// Componente reutilizável de switch visual
-function Toggle({ enabled, onToggle }) {
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-all duration-300 focus:outline-none ${enabled ? 'bg-teal-500' : 'bg-gray-200'
-        }`}
-    >
-      <span
-        className={`inline-block h-5 w-5 rounded-full bg-white shadow-md transform transition-transform duration-300 ${enabled ? 'translate-x-6' : 'translate-x-1'
-          }`}
-      />
-    </button>
-  );
-}
 
 export default function Perfil() {
   const navigate = useNavigate();
   const { logoutUser, user, updateUser } = useExpenses();
-
-  // Configuração visual (apenas estado local, sem lógica real)
-  const [modoEscuro, setModoEscuro] = useState(false);
 
   const handleLogout = () => {
     logoutUser();
@@ -109,32 +88,6 @@ export default function Perfil() {
 
           <h2 className="text-xl font-bold text-gray-900 mb-0.5">{user?.name}</h2>
           <p className="text-gray-500 text-sm">{user?.email}</p>
-
-
-        </div>
-
-        {/* Seção de Configurações */}
-        <div className="px-6 mt-6">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Configurações</p>
-
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
-            {/* Modo Escuro */}
-            <div className="flex items-center justify-between px-4 py-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center">
-                  <Moon size={18} />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-800">Modo Escuro</p>
-                  <p className="text-xs text-gray-400">Altera o tema do aplicativo</p>
-                </div>
-              </div>
-              <Toggle
-                enabled={modoEscuro}
-                onToggle={() => setModoEscuro(!modoEscuro)}
-              />
-            </div>
-          </div>
         </div>
 
         {/* Links de Ações da Conta */}

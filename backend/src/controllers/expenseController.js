@@ -1,3 +1,4 @@
+import fs from 'fs/promises';
 import {
     createExpenseService,
     getExpensesByGroupService,
@@ -9,10 +10,18 @@ import {
 
 export async function createExpense(req, res) {
     try {
-        const { groupId, title, amount, payerId, date, split } = req.body;
-        const expense = await createExpenseService(groupId, title, amount, payerId, date, split);
+        const groupId = Number(req.body.groupId);
+        const title = req.body.title;
+        const amount = Number(req.body.amount);
+        const payerId = Number(req.body.payerId);
+        const date = req.body.date;
+        const split = typeof req.body.split === 'string' ? JSON.parse(req.body.split) : req.body.split;
+        const receipt = req.file ? `receipts/${req.file.filename}` : null;
+
+        const expense = await createExpenseService(groupId, title, amount, payerId, date, split, receipt);
         res.status(201).json(expense);
     } catch (error) {
+        if (req.file) await fs.unlink(req.file.path).catch(() => {});
         res.status(400).json({ message: error.message });
     }
 }

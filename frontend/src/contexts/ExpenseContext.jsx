@@ -83,7 +83,7 @@ export function ExpenseProvider({ children }) {
             amount: exp.amount,
             payerId: exp.payerId,
             date: exp.date,
-            receipt: null,
+            receipt: exp.receipt || null,
             split: exp.ExpenseSplits.map(s => ({
               memberId: s.memberId,
               amount: s.amount
@@ -131,7 +131,7 @@ export function ExpenseProvider({ children }) {
         amount: exp.amount,
         payerId: exp.payerId,
         date: exp.date,
-        receipt: null,
+        receipt: exp.receipt || null,
         split: exp.ExpenseSplits.map(s => ({ memberId: s.memberId, amount: s.amount }))
       }));
       setAllExpenses(prev => {
@@ -259,20 +259,23 @@ export function ExpenseProvider({ children }) {
 
     const userNesseGrupo = membrosAtivos.find(m => m.name.includes('Você'));
 
-    const expenseData = {
-      groupId: selectedGroup.id,
-      title: newExpense.title || 'Despesa Indefinida',
-      amount: parseFloat(newExpense.amount),
-      payerId: newExpense.payerId || (userNesseGrupo ? userNesseGrupo.id : membrosAtivos[0].id),
-      date: new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date()),
-      split
-    };
+    const formData = new FormData();
+    formData.append('groupId', selectedGroup.id);
+    formData.append('title', newExpense.title || 'Despesa Indefinida');
+    formData.append('amount', parseFloat(newExpense.amount));
+    formData.append('payerId', newExpense.payerId || (userNesseGrupo ? userNesseGrupo.id : membrosAtivos[0].id));
+    formData.append('date', new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date()));
+    formData.append('split', JSON.stringify(split));
+    if (newExpense.receiptFile) {
+      formData.append('receipt', newExpense.receiptFile);
+    }
 
     try {
+      const token = localStorage.getItem('token');
       const res = await fetch(`${API}/api/expenses`, {
         method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify(expenseData)
+        headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+        body: formData
       });
       if (!res.ok) throw new Error("Erro ao criar despesa");
       const saved = await res.json();
@@ -284,7 +287,7 @@ export function ExpenseProvider({ children }) {
         amount: saved.amount,
         payerId: saved.payerId,
         date: saved.date,
-        receipt: null,
+        receipt: saved.receipt || null,
         split: saved.ExpenseSplits.map(s => ({ memberId: s.memberId, amount: s.amount }))
       };
 
@@ -324,11 +327,51 @@ export function ExpenseProvider({ children }) {
         amount: saved.amount,
         payerId: saved.payerId,
         date: saved.date,
-        receipt: null,
+        receipt: saved.receipt || null,
         split: saved.ExpenseSplits.map(s => ({ memberId: s.memberId, amount: s.amount }))
       };
 
       setAllExpenses(prev => prev.map(e => e.id === id ? updated : e));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const settleDebt = async (creditorMemberId, amount) => {
+    if (!selectedGroup || !userNesseGrupo) return;
+
+    const split = [{ memberId: creditorMemberId, amount }];
+
+    const formData = new FormData();
+    formData.append('groupId', selectedGroup.id);
+    formData.append('title', 'Pagamento de dívida');
+    formData.append('amount', amount);
+    formData.append('payerId', userNesseGrupo.id);
+    formData.append('date', new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date()));
+    formData.append('split', JSON.stringify(split));
+
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API}/api/expenses`, {
+        method: 'POST',
+        headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+        body: formData
+      });
+      if (!res.ok) throw new Error("Erro ao registrar pagamento");
+      const saved = await res.json();
+
+      const expense = {
+        id: saved.id.toString(),
+        groupId: saved.groupId,
+        title: saved.title,
+        amount: saved.amount,
+        payerId: saved.payerId,
+        date: saved.date,
+        receipt: saved.receipt || null,
+        split: saved.ExpenseSplits.map(s => ({ memberId: s.memberId, amount: s.amount }))
+      };
+
+      setAllExpenses(prev => [expense, ...prev]);
     } catch (err) {
       console.error(err);
     }
@@ -401,6 +444,7 @@ export function ExpenseProvider({ children }) {
       deleteGroup,
       updateExpense,
       getExpenseById,
+      settleDebt,
       userTotalDebt,
       userTotalReceive,
       userBalances

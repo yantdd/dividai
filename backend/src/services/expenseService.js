@@ -1,12 +1,18 @@
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import Expense from '../models/Expense.js';
 import ExpenseSplit from '../models/ExpenseSplit.js';
 
-export async function createExpenseService(groupId, title, amount, payerId, date, split) {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export async function createExpenseService(groupId, title, amount, payerId, date, split, receipt) {
     if (!groupId || !title || !amount || !payerId || !date) {
         throw new Error("Todos os campos são obrigatórios!");
     }
 
-    const newExpense = await Expense.create({ groupId, title, amount, payerId, date });
+    const newExpense = await Expense.create({ groupId, title, amount, payerId, date, receipt });
 
     if (split && split.length > 0) {
         for (const item of split) {
@@ -73,6 +79,11 @@ export async function updateExpenseService(expenseId, data) {
 export async function deleteExpenseService(expenseId) {
     const expense = await Expense.findByPk(expenseId);
     if (!expense) throw new Error("Despesa não encontrada!");
+
+    if (expense.receipt) {
+        const filePath = path.join(__dirname, '../../uploads', expense.receipt);
+        await fs.unlink(filePath).catch(() => {});
+    }
 
     await expense.destroy();
     return true;

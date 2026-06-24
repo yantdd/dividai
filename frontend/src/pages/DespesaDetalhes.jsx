@@ -3,6 +3,8 @@ import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { ArrowLeft, Edit2, CheckCircle2, Image as ImageIcon, Crown } from 'lucide-react';
 import { useExpenses } from '../contexts/ExpenseContext';
 
+const API = import.meta.env.VITE_API_URL;
+
 export default function DespesaDetalhes() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -77,14 +79,27 @@ export default function DespesaDetalhes() {
       </header>
 
       <div className="flex-1 overflow-y-auto pb-6 w-full max-w-3xl mx-auto custom-scroll flex-col">
-        {/* Placeholder da Foto da Nota Fiscal */}
-        <div className="w-full h-48 sm:h-64 sm:rounded-2xl sm:mt-6 bg-gray-100 flex flex-col items-center justify-center text-gray-400 group relative">
-          <ImageIcon size={40} className="mb-2 opacity-50" />
-          <span className="text-sm font-medium">Nota Fiscal (Upload)</span>
-          <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <span className="bg-white px-3 py-1 rounded-full text-xs font-semibold text-gray-600 shadow-sm">Ver em Tela Cheia</span>
+        {/* Foto da Nota Fiscal */}
+        {expense.receipt ? (
+          <div className="w-full h-48 sm:h-64 sm:rounded-2xl sm:mt-6 overflow-hidden relative group">
+            <img
+              src={`${API}/uploads/${expense.receipt}`}
+              alt="Comprovante"
+              className="w-full h-full object-cover"
+            />
+            <div
+              className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+              onClick={() => window.open(`${API}/uploads/${expense.receipt}`, '_blank')}
+            >
+              <span className="bg-white px-3 py-1 rounded-full text-xs font-semibold text-gray-600 shadow-sm">Ver em Tela Cheia</span>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="w-full h-48 sm:h-64 sm:rounded-2xl sm:mt-6 bg-gray-100 flex flex-col items-center justify-center text-gray-400">
+            <ImageIcon size={40} className="mb-2 opacity-50" />
+            <span className="text-sm font-medium">Sem comprovante</span>
+          </div>
+        )}
 
         <div className="p-6">
           {/* Resumo da despesa */}

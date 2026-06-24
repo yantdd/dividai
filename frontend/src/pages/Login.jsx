@@ -5,7 +5,7 @@ import { useExpenses } from '../contexts/ExpenseContext';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { isLoggedIn, loginUser, logoutUser, groups, createGroup, deleteGroup, setSelectedGroup } = useExpenses();
+  const { isLoggedIn, loginUser, logoutUser, user, groups, createGroup, deleteGroup, setSelectedGroup } = useExpenses();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -84,9 +84,13 @@ export default function Login() {
             </div>
             <button
               onClick={() => navigate('/perfil')}
-              className="p-2 text-teal-100 hover:text-white transition-colors rounded-full hover:bg-teal-500"
+              className="p-1 rounded-full hover:bg-teal-500 transition-colors"
             >
-              <UserCircle2 size={28} />
+              {user?.photo ? (
+                <img src={user.photo} alt="Perfil" className="w-9 h-9 rounded-full object-cover border-2 border-teal-300" />
+              ) : (
+                <UserCircle2 size={28} className="text-teal-100 hover:text-white" />
+              )}
             </button>
           </div>
         </header>

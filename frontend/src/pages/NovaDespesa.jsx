@@ -1,42 +1,62 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Camera, Loader2, CheckCircle2, DollarSign } from 'lucide-react';
+import { ArrowLeft, Camera, Loader2, DollarSign, Upload, X } from 'lucide-react';
 import { useExpenses } from '../contexts/ExpenseContext';
 
 export default function NovaDespesa() {
   const navigate = useNavigate();
   const { addExpense, groupMembers } = useExpenses();
-  
-  const [loading, setLoading] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analyzedSuccess, setAnalyzedSuccess] = useState(false);
 
+  const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
-  // Inicializa com o primeiro membro real do grupo (pode ser id 4, 5... dependendo do grupo)
   const [payerId, setPayerId] = useState(() => groupMembers[0]?.id ?? '');
+
+  const [receiptFile, setReceiptFile] = useState(null);
+  const [receiptPreview, setReceiptPreview] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const fileInputRef = useRef(null);
 
-  const handleSimulateUpload = (e) => {
-    e.preventDefault(); // Impede evento acidental se englobado de outra forma
-    if (isAnalyzing || analyzedSuccess) return;
+  const handleFileSelected = (file) => {
+    if (!file) return;
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert('Formato não suportado. Use JPG, PNG ou WebP.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Imagem muito grande. Máximo 5MB.');
+      return;
+    }
+    setReceiptFile(file);
+    const reader = new FileReader();
+    reader.onload = (e) => setReceiptPreview(e.target.result);
+    reader.readAsDataURL(file);
+  };
 
-    setIsAnalyzing(true);
-    setAnalyzedSuccess(false);
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
 
-    // EFEITO UAU: Simulando a leitura por Inteligência Artificial
-    setTimeout(() => {
-      setIsAnalyzing(false);
-      setAnalyzedSuccess(true);
-      
-      // Gera um valor aleatório entre 50 e 400
-      const randomValue = (Math.random() * 350 + 50).toFixed(2);
-      setAmount(randomValue);
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
 
-      // (Reversão para que possa "re-upar" a nota se quiser após a demonstração)
-      setTimeout(() => setAnalyzedSuccess(false), 4000);
-    }, 2000);
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    handleFileSelected(file);
+  };
+
+  const handleRemoveReceipt = (e) => {
+    e.stopPropagation();
+    setReceiptFile(null);
+    setReceiptPreview(null);
+    fileInputRef.current.value = '';
   };
 
   const handleSubmit = async (e) => {
@@ -48,7 +68,8 @@ export default function NovaDespesa() {
     await addExpense({
       title: title || 'Despesa Indefinida',
       amount,
-      payerId
+      payerId,
+      receiptFile
     });
     navigate('/dashboard');
   };
@@ -66,69 +87,82 @@ export default function NovaDespesa() {
         </div>
       </header>
 
-      <form className="p-6 flex-1 flex flex-col overflow-y-auto w-full max-w-3xl mx-auto w-full custom-scroll" onSubmit={handleSubmit}>
+      <form className="p-6 flex-1 flex flex-col overflow-y-auto w-full max-w-3xl mx-auto custom-scroll" onSubmit={handleSubmit}>
         <div className="space-y-6 flex-1">
-          
-          {/* Zona de Upload / IA */}
-          <div className="group mt-2">
+
+          {/* Zona de Upload com Drag & Drop */}
+          <div className="mt-2">
             <h2 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">Comprovante</h2>
-            <button 
-              type="button" 
-              onClick={handleSimulateUpload}
-              className={`w-full h-36 border-2 border-dashed rounded-2xl p-4 flex flex-col items-center justify-center transition-all ${
-                isAnalyzing 
-                  ? 'border-teal-400 bg-teal-50 text-teal-600' 
-                  : analyzedSuccess
-                    ? 'border-emerald-400 bg-emerald-50 text-emerald-600'
-                    : 'border-gray-300 bg-gray-50 text-gray-400 hover:border-teal-400 hover:text-teal-600 hover:bg-teal-50 focus:ring-2 focus:ring-teal-500'
-              }`}
+            <div
+              onClick={() => !receiptPreview && fileInputRef.current.click()}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`w-full border-2 border-dashed rounded-2xl transition-all cursor-pointer overflow-hidden ${
+                receiptPreview
+                  ? 'border-emerald-400 bg-emerald-50 p-0'
+                  : isDragging
+                    ? 'border-teal-500 bg-teal-50 text-teal-600 h-36'
+                    : 'border-gray-300 bg-gray-50 text-gray-400 hover:border-teal-400 hover:text-teal-600 hover:bg-teal-50 h-36'
+              } ${!receiptPreview ? 'flex flex-col items-center justify-center p-4' : 'relative'}`}
             >
-              {isAnalyzing ? (
+              {receiptPreview ? (
+                <div className="relative">
+                  <img
+                    src={receiptPreview}
+                    alt="Preview do comprovante"
+                    className="w-full max-h-64 object-contain"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRemoveReceipt}
+                    className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-600 transition-colors"
+                  >
+                    <X size={16} strokeWidth={3} />
+                  </button>
+                </div>
+              ) : isDragging ? (
                 <>
-                  <Loader2 size={36} className="mb-3 animate-spin" />
-                  <span className="text-sm font-medium animate-pulse">Lendo nota com IA...</span>
-                </>
-              ) : analyzedSuccess ? (
-                <>
-                  <CheckCircle2 size={36} className="mb-3" />
-                  <span className="text-sm font-medium">Nota lida! Valor extraído.</span>
+                  <Upload size={36} className="mb-3 animate-bounce" />
+                  <span className="text-sm font-medium">Solte a imagem aqui</span>
                 </>
               ) : (
                 <>
                   <Camera size={36} className="mb-3" />
-                  <span className="text-sm font-medium">Toque para scanear a nota</span>
-                  <span className="text-xs mt-1 text-gray-500 tracking-tight">(Simula Inteligência Artificial)</span>
+                  <span className="text-sm font-medium">Arraste uma imagem ou toque para selecionar</span>
+                  <span className="text-xs mt-1 text-gray-400">JPG, PNG ou WebP (máx. 5MB)</span>
                 </>
               )}
-            </button>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              className="hidden" 
-              accept="image/*"
+            </div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(e) => handleFileSelected(e.target.files[0])}
             />
           </div>
 
           <div className="pt-2 border-t border-gray-100">
             <h2 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">Detalhes</h2>
-            
+
             {/* Título */}
             <div className="group mb-4">
               <label className="block text-sm font-medium text-gray-600 mb-1">Título da Despesa</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ex: Combustível viagem, Pizzaria..." 
+                placeholder="Ex: Combustível viagem, Pizzaria..."
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all font-medium text-gray-800"
                 required
               />
             </div>
-            
+
             {/* Pagador */}
             <div className="group mb-4">
               <label className="block text-sm font-medium text-gray-600 mb-1">Quem pagou?</label>
-              <select 
+              <select
                 value={payerId}
                 onChange={(e) => setPayerId(Number(e.target.value))}
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all font-medium text-gray-800 appearance-none"
@@ -148,16 +182,14 @@ export default function NovaDespesa() {
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                   <DollarSign size={20} />
                 </span>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   step="0.01"
                   min="0.01"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0,00" 
-                  className={`w-full border border-gray-200 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all font-bold text-gray-800 text-lg ${
-                    analyzedSuccess ? 'bg-emerald-50 ring-2 ring-emerald-300 ring-offset-1' : 'bg-gray-50 focus:bg-white'
-                  }`}
+                  placeholder="0,00"
+                  className="w-full border border-gray-200 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all font-bold text-gray-800 text-lg bg-gray-50 focus:bg-white"
                   required
                 />
               </div>
@@ -166,9 +198,9 @@ export default function NovaDespesa() {
         </div>
 
         <div className="mt-6 shrink-0 pb-4">
-          <button 
-            type="submit" 
-            disabled={loading || isAnalyzing}
+          <button
+            type="submit"
+            disabled={loading}
             className="w-full flex justify-center items-center py-4 px-4 rounded-xl shadow-md text-white bg-teal-600 hover:bg-teal-700 font-semibold transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {loading ? <Loader2 size={22} className="animate-spin" /> : 'Salvar no Grupo'}
