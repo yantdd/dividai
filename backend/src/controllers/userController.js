@@ -1,13 +1,20 @@
+import jwt from 'jsonwebtoken';
 import * as userService from '../services/userService.js';
+
+function generateToken(user) {
+    return jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+}
 
 export async function cadastrarUsuario(req, res) {
     try {
         const { name, email, password } = req.body;
 
         const newUser = await userService.createUserService(name, email, password);
+        const token = generateToken(newUser);
 
         return res.status(201).json({
             message: 'Usuário cadastrado com sucesso!',
+            token,
             user: {
                 id: newUser.id,
                 name: newUser.name,
@@ -27,9 +34,11 @@ export async function login(req, res) {
         const { email, password } = req.body;
 
         const user = await userService.loginService(email, password);
+        const token = generateToken(user);
 
         return res.status(200).json({
             message: 'Usuário logado com sucesso!',
+            token,
             user: {
                 id: user.id,
                 name: user.name,

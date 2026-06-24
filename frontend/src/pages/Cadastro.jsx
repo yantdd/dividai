@@ -30,7 +30,7 @@ export default function Cadastro() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/users/cadastrar', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/cadastrar`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

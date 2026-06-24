@@ -28,12 +28,13 @@ export default function EditarPerfil() {
     setLoading(true);
 
     try {
-      const response = await fetch(`http://localhost:3000/api/users/${user.id}`, {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
         },
-        // Envia a senha apenas se ela foi preenchida
         body: JSON.stringify({ name: nome, email, ...(senha && { password: senha }) }),
       });
 

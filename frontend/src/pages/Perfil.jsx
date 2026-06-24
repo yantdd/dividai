@@ -22,13 +22,13 @@ function Toggle({ enabled, onToggle }) {
 
 export default function Perfil() {
   const navigate = useNavigate();
-  const { setIsLoggedIn, user, updateUser } = useExpenses();
+  const { logoutUser, user, updateUser } = useExpenses();
 
   // Configuração visual (apenas estado local, sem lógica real)
   const [modoEscuro, setModoEscuro] = useState(false);
 
   const handleLogout = () => {
-    setIsLoggedIn(false);  // Reseta o estado de autenticação global
+    logoutUser();
     navigate('/');
   };
 
@@ -78,9 +78,13 @@ export default function Perfil() {
                   reader.onload = async (event) => {
                     const base64Photo = event.target.result;
                     try {
-                      const response = await fetch(`http://localhost:3000/api/users/${user.id}`, {
+                      const token = localStorage.getItem('token');
+                      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user.id}`, {
                         method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                          'Content-Type': 'application/json',
+                          ...(token && { Authorization: `Bearer ${token}` })
+                        },
                         body: JSON.stringify({ photo: base64Photo }),
                       });
 

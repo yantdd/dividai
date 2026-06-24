@@ -5,7 +5,7 @@ import { useExpenses } from '../contexts/ExpenseContext';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { isLoggedIn, setIsLoggedIn, setUser, groups, createGroup, deleteGroup, setSelectedGroup } = useExpenses();
+  const { isLoggedIn, loginUser, logoutUser, groups, createGroup, deleteGroup, setSelectedGroup } = useExpenses();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,22 +25,21 @@ export default function Login() {
     if (email && password) {
       setLoading(true);
       try {
-        const response = await fetch('http://localhost:3000/api/users/login', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ email, password }),
         });
-        
+
         const data = await response.json();
-        
+
         if (!response.ok) {
           throw new Error(data.error || 'Erro ao fazer login');
         }
 
-        setUser(data.user);
-        setIsLoggedIn(true);
+        loginUser(data.user, data.token);
       } catch (err) {
         setErrorMsg(err.message);
       } finally {

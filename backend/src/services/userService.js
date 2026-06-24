@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 import User from '../models/User.js';
 
 export async function createUserService(name, email, password) {
@@ -8,7 +9,8 @@ export async function createUserService(name, email, password) {
         throw new Error("Email já cadastrado!");
     }
 
-    const user = await User.create({ name, email, password });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({ name, email, password: hashedPassword });
     return user;
 }
 
@@ -18,7 +20,8 @@ export async function loginService(email, password) {
     const user = await User.findOne({ where: { email } });
     if (!user) throw new Error("Email ou senha inválidos!");
 
-    if (user.password !== password) throw new Error("Email ou senha inválidos!");
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) throw new Error("Email ou senha inválidos!");
 
     return user;
 }
@@ -34,14 +37,13 @@ export async function updateUserService(id, data) {
         if (existingUser) throw new Error("Este email já está em uso!");
     }
 
-    // Apenas os campos enviados serão atualizados
     const updateData = {};
     if (name) updateData.name = name;
     if (email) updateData.email = email;
-    if (password) updateData.password = password;
-    if (photo !== undefined) updateData.photo = photo; // permite foto null (remover) ou base64
+    if (password) updateData.password = await bcrypt.hash(password, 10);
+    if (photo !== undefined) updateData.photo = photo;
 
     await user.update(updateData);
-    
+
     return user;
 }

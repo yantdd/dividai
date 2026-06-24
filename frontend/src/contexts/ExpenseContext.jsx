@@ -1,20 +1,48 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
+const API = import.meta.env.VITE_API_URL;
+
 const ExpenseContext = createContext({});
 
+function authHeaders() {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` })
+  };
+}
+
 export function ExpenseProvider({ children }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('token'));
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('user');
+    return saved ? JSON.parse(saved) : null;
+  });
 
   const [groups, setGroups] = useState([]);
-
   const [selectedGroup, setSelectedGroup] = useState(null);
 
-  const [user, setUser] = useState(null);
+  const loginUser = (userData, token) => {
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+    setIsLoggedIn(true);
+  };
 
-  // Busca grupos quando o usuário loga
+  const logoutUser = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    setIsLoggedIn(false);
+    setGroups([]);
+    setSelectedGroup(null);
+    setAllGroupMembers([]);
+    setAllExpenses([]);
+  };
+
   useEffect(() => {
     if (user) {
-      fetch(`http://localhost:3000/api/groups/user/${user.id}`)
+      fetch(`${API}/api/groups/user/${user.id}`, { headers: authHeaders() })
         .then(res => res.json())
         .then(data => setGroups(data))
         .catch(err => console.error("Erro ao buscar grupos:", err));
@@ -23,13 +51,11 @@ export function ExpenseProvider({ children }) {
     }
   }, [user]);
 
-  // Membros por grupo — cada membro tem um groupId
   const [allGroupMembers, setAllGroupMembers] = useState([]);
 
-  // Busca membros quando seleciona um grupo
   useEffect(() => {
     if (selectedGroup) {
-      fetch(`http://localhost:3000/api/groups/${selectedGroup.id}/members`)
+      fetch(`${API}/api/groups/${selectedGroup.id}/members`, { headers: authHeaders() })
         .then(res => res.json())
         .then(data => {
           setAllGroupMembers(prev => {
@@ -41,16 +67,13 @@ export function ExpenseProvider({ children }) {
     }
   }, [selectedGroup]);
 
-
-  // Membros do grupo atual
   const groupMembers = selectedGroup
     ? allGroupMembers.filter(m => m.groupId === selectedGroup.id)
     : [];
 
-  // Busca despesas quando seleciona um grupo
   useEffect(() => {
     if (selectedGroup) {
-      fetch(`http://localhost:3000/api/expenses/group/${selectedGroup.id}`)
+      fetch(`${API}/api/expenses/group/${selectedGroup.id}`, { headers: authHeaders() })
         .then(res => res.json())
         .then(data => {
           const formatted = data.map(exp => ({
@@ -82,9 +105,9 @@ export function ExpenseProvider({ children }) {
       .split('.').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
 
     try {
-      const res = await fetch(`http://localhost:3000/api/groups/${selectedGroup.id}/members`, {
+      const res = await fetch(`${API}/api/groups/${selectedGroup.id}/members`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ name: nomeFicticio })
       });
       if (!res.ok) throw new Error("Erro ao adicionar membro");
@@ -93,15 +116,13 @@ export function ExpenseProvider({ children }) {
       const membrosAtuais = allGroupMembers.filter(m => m.groupId === selectedGroup.id);
       const todosMembros = [...membrosAtuais, novoMembro];
 
-      // Recalcula splits no backend
-      await fetch(`http://localhost:3000/api/expenses/group/${selectedGroup.id}/recalculate`, {
+      await fetch(`${API}/api/expenses/group/${selectedGroup.id}/recalculate`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ members: todosMembros })
       });
 
-      // Re-busca despesas do backend para sincronizar
-      const expRes = await fetch(`http://localhost:3000/api/expenses/group/${selectedGroup.id}`);
+      const expRes = await fetch(`${API}/api/expenses/group/${selectedGroup.id}`, { headers: authHeaders() });
       const expData = await expRes.json();
       const formatted = expData.map(exp => ({
         id: exp.id.toString(),
@@ -132,24 +153,22 @@ export function ExpenseProvider({ children }) {
         m => m.groupId === selectedGroup.id && m.id !== memberId
       );
 
-      // Recalcula splits ANTES de deletar o membro (evita FK violation)
       if (membrosRestantes.length > 0) {
-        await fetch(`http://localhost:3000/api/expenses/group/${selectedGroup.id}/recalculate`, {
+        await fetch(`${API}/api/expenses/group/${selectedGroup.id}/recalculate`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(),
           body: JSON.stringify({ members: membrosRestantes })
         });
       }
 
-      // Agora deleta o membro
-      const res = await fetch(`http://localhost:3000/api/groups/members/${memberId}`, {
-        method: 'DELETE'
+      const res = await fetch(`${API}/api/groups/members/${memberId}`, {
+        method: 'DELETE',
+        headers: authHeaders()
       });
       if (!res.ok) throw new Error("Erro ao remover membro");
 
-      // Re-busca despesas do backend para sincronizar
       if (membrosRestantes.length > 0) {
-        const expRes = await fetch(`http://localhost:3000/api/expenses/group/${selectedGroup.id}`);
+        const expRes = await fetch(`${API}/api/expenses/group/${selectedGroup.id}`, { headers: authHeaders() });
         const expData = await expRes.json();
         const formatted = expData.map(exp => ({
           id: exp.id.toString(),
@@ -176,42 +195,42 @@ export function ExpenseProvider({ children }) {
   };
 
   const updateUser = (data) => {
-    setUser(prev => ({ ...prev, ...data }));
+    const updated = { ...user, ...data };
+    setUser(updated);
+    localStorage.setItem('user', JSON.stringify(updated));
     if (data.name) {
       setAllGroupMembers(prev => prev.map(m => m.name.includes('(Você)') ? { ...m, name: `${data.name} (Você)` } : m));
     }
   };
 
-  // Cria um novo grupo e automaticamente adiciona o usuário atual como membro
   const createGroup = async (nome) => {
     if (!user) return;
     try {
-      const response = await fetch('http://localhost:3000/api/groups', {
+      const response = await fetch(`${API}/api/groups`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ name: nome, ownerId: user.id })
       });
       if (!response.ok) throw new Error("Falha ao criar grupo");
       const newGroup = await response.json();
-      
+
       setGroups(prev => [...prev, newGroup]);
     } catch (err) {
       console.error(err);
     }
   };
 
-  // Remove o grupo e todos os dados associados (membros + despesas)
   const deleteGroup = async (groupId) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/groups/${groupId}`, {
-        method: 'DELETE'
+      const response = await fetch(`${API}/api/groups/${groupId}`, {
+        method: 'DELETE',
+        headers: authHeaders()
       });
       if (!response.ok) throw new Error("Falha ao deletar grupo");
 
       setGroups(prev => prev.filter(g => g.id !== groupId));
       setAllGroupMembers(prev => prev.filter(m => m.groupId !== groupId));
       setAllExpenses(prev => prev.filter(e => e.groupId !== groupId));
-      // Se o grupo deletado era o selecionado, limpa a seleção
       if (selectedGroup && selectedGroup.id === groupId) {
         setSelectedGroup(null);
       }
@@ -220,9 +239,7 @@ export function ExpenseProvider({ children }) {
     }
   };
 
-  // Despesas por grupo
   const [allExpenses, setAllExpenses] = useState([]);
-
 
   const expenses = selectedGroup
     ? allExpenses.filter(e => e.groupId === selectedGroup.id)
@@ -252,9 +269,9 @@ export function ExpenseProvider({ children }) {
     };
 
     try {
-      const res = await fetch('http://localhost:3000/api/expenses', {
+      const res = await fetch(`${API}/api/expenses`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify(expenseData)
       });
       if (!res.ok) throw new Error("Erro ao criar despesa");
@@ -279,8 +296,9 @@ export function ExpenseProvider({ children }) {
 
   const deleteExpense = async (id) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/expenses/${id}`, {
-        method: 'DELETE'
+      const res = await fetch(`${API}/api/expenses/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders()
       });
       if (!res.ok) throw new Error("Erro ao deletar despesa");
       setAllExpenses(prev => prev.filter(e => e.id !== id));
@@ -291,9 +309,9 @@ export function ExpenseProvider({ children }) {
 
   const updateExpense = async (id, updatedData) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/expenses/${id}`, {
+      const res = await fetch(`${API}/api/expenses/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify(updatedData)
       });
       if (!res.ok) throw new Error("Erro ao atualizar despesa");
@@ -318,14 +336,11 @@ export function ExpenseProvider({ children }) {
 
   const getExpenseById = (id) => allExpenses.find(e => e.id === id);
 
-  // Membro local do usuário no grupo atual
   const userNesseGrupo = groupMembers.find(m => m.name.includes('Você'));
 
   const getBalances = () => {
     if (!userNesseGrupo) return {};
-    
-    // balances armazenará o saldo de cada membro EM RELAÇÃO AO USUÁRIO
-    // chave: id do membro, valor: saldo (positivo = membro deve ao usuário, negativo = usuário deve ao membro)
+
     const balances = {};
     groupMembers.forEach(m => {
       if (m.id !== userNesseGrupo.id) {
@@ -335,14 +350,12 @@ export function ExpenseProvider({ children }) {
 
     expenses.forEach(exp => {
       if (exp.payerId === userNesseGrupo.id) {
-        // Usuário pagou: os outros devem a ele a parte deles
         exp.split.forEach(s => {
           if (s.memberId !== userNesseGrupo.id && balances[s.memberId] !== undefined) {
             balances[s.memberId] += s.amount;
           }
         });
       } else {
-        // Outro pagou: o usuário deve ao pagador a parte dele (do usuário)
         const userSplit = exp.split.find(s => s.memberId === userNesseGrupo.id);
         if (userSplit && balances[exp.payerId] !== undefined) {
           balances[exp.payerId] -= userSplit.amount;
@@ -377,6 +390,8 @@ export function ExpenseProvider({ children }) {
       user,
       setUser,
       updateUser,
+      loginUser,
+      logoutUser,
       groupMembers,
       addMemberToGroup,
       removeMemberFromGroup,
