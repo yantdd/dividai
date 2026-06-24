@@ -69,9 +69,9 @@ const startServer = async () => {
 
     try {
         await sequelize.sync({ alter: true });
-        console.log('✅ Modelos sincronizados com o banco de dados.');
+        console.log('Modelos sincronizados com o banco de dados.');
     } catch (error) {
-        console.error('❌ Erro ao sincronizar modelos:', error);
+        console.error('Erro ao sincronizar modelos:', error);
     }
 
     app.listen(PORT, () => {

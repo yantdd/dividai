@@ -25,11 +25,19 @@ function getInitials(name) {
 
 function ModalConvidar({ onClose, onConfirmar }) {
   const [email, setEmail] = useState('');
+  const [erro, setErro] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email.trim()) return;
-    onConfirmar(email);
+    setErro('');
+    setLoading(true);
+    const result = await onConfirmar(email);
+    setLoading(false);
+    if (result && !result.success) {
+      setErro(result.error);
+    }
   };
 
   return (
@@ -47,20 +55,26 @@ function ModalConvidar({ onClose, onConfirmar }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">E-mail do convidado</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">E-mail do membro</label>
             <input
               type="email"
               autoFocus
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); setErro(''); }}
               placeholder="amigo@email.com"
               className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
               required
             />
             <p className="text-xs text-gray-400 mt-1.5">
-              Um convite será enviado por e-mail (simulado).
+              O membro precisa estar cadastrado na plataforma.
             </p>
           </div>
+
+          {erro && (
+            <p className="text-sm text-red-500 font-medium bg-red-50 px-4 py-2 rounded-xl border border-red-100">
+              {erro}
+            </p>
+          )}
 
           <div className="flex gap-3 pt-2">
             <button
@@ -72,9 +86,10 @@ function ModalConvidar({ onClose, onConfirmar }) {
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 rounded-xl bg-teal-600 text-white font-semibold hover:bg-teal-700 transition-colors shadow-sm active:scale-95"
+              disabled={loading}
+              className="flex-1 py-3 rounded-xl bg-teal-600 text-white font-semibold hover:bg-teal-700 transition-colors shadow-sm active:scale-95 disabled:opacity-70"
             >
-              Adicionar
+              {loading ? 'Buscando...' : 'Adicionar'}
             </button>
           </div>
         </form>
@@ -95,6 +110,8 @@ export default function Dashboard() {
   const [membroParaDeletar, setMembroParaDeletar] = useState(null);
   const [membroParaPagar, setMembroParaPagar] = useState(null);
 
+  const isOwner = selectedGroup && user && selectedGroup.ownerId === user.id;
+
   const formatCurrency = (value) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
@@ -109,9 +126,12 @@ export default function Dashboard() {
     await deleteExpense(id);
   };
 
-  const handleConvidar = (email) => {
-    addMemberToGroup(email);
-    setModalAberto(false);
+  const handleConvidar = async (email) => {
+    const result = await addMemberToGroup(email);
+    if (result && result.success) {
+      setModalAberto(false);
+    }
+    return result;
   };
 
   const handleConfirmarPagamento = async () => {
@@ -144,7 +164,6 @@ export default function Dashboard() {
 
       {/* Cards financeiros */}
       <div className="px-6 -mt-6 relative z-10 shrink-0 grid grid-cols-2 gap-4 max-w-6xl mx-auto w-full">
-        {/* Saldo Total */}
         <div className={`col-span-2 bg-white rounded-2xl shadow-sm p-4 outline outline-1 outline-gray-100 border-l-4 ${userTotalReceive - userTotalDebt >= 0 ? 'border-l-blue-500' : 'border-l-red-500'} flex items-center justify-between`}>
           <div>
             <p className="text-gray-500 text-xs font-semibold uppercase tracking-wide">Saldo Total</p>
@@ -212,13 +231,15 @@ export default function Dashboard() {
             <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">
               Membros · {groupMembers.length}
             </p>
-            <button
-              onClick={() => setModalAberto(true)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-teal-600 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-full transition-colors"
-            >
-              <UserPlus size={14} />
-              Adicionar
-            </button>
+            {isOwner && (
+              <button
+                onClick={() => setModalAberto(true)}
+                className="flex items-center gap-1.5 text-xs font-semibold text-teal-600 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-full transition-colors"
+              >
+                <UserPlus size={14} />
+                Adicionar
+              </button>
+            )}
           </div>
 
           {groupMembers.length === 0 ? (
@@ -233,7 +254,7 @@ export default function Dashboard() {
                   <div key={member.id} className="relative flex flex-col items-center gap-1 group/member">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm ${getAvatarColor(member.name)} relative`}>
                       {getInitials(member.name)}
-                      {!isCurrentUser && (
+                      {isOwner && !isCurrentUser && (
                         <button
                           onClick={() => setMembroParaDeletar(member)}
                           className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 shadow-sm opacity-0 group-hover/member:opacity-100 transition-opacity hover:bg-red-600 outline-none"

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Mail, Lock, LogIn, Plus, ChevronRight, UserCircle2, Check, X, Trash2 } from 'lucide-react';
+import { Users, Mail, Lock, LogIn, Plus, ChevronRight, UserCircle2, Check, X, Trash2, LogOut as LogOutIcon } from 'lucide-react';
 import { useExpenses } from '../contexts/ExpenseContext';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { isLoggedIn, loginUser, logoutUser, user, groups, createGroup, deleteGroup, setSelectedGroup } = useExpenses();
+  const { isLoggedIn, loginUser, logoutUser, user, groups, createGroup, deleteGroup, leaveGroup, setSelectedGroup } = useExpenses();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -97,31 +97,34 @@ export default function Login() {
 
         <div className="flex-1 p-6 overflow-y-auto w-full max-w-4xl mx-auto">
           <div className="space-y-4 mb-8">
-            {groups.map((group) => (
-              <div key={group.id} className="relative group/card">
-                <button
-                  onClick={() => handleEntrarGrupo(group)}
-                  className="w-full text-left flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm border border-gray-100 hover:border-teal-300 hover:shadow-md transition-all active:scale-95 pr-14"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center group-hover:bg-teal-200 transition-colors">
-                      <Users size={24} />
+            {groups.map((group) => {
+              const isGroupOwner = group.ownerId === user?.id;
+              return (
+                <div key={group.id} className="relative group/card">
+                  <button
+                    onClick={() => handleEntrarGrupo(group)}
+                    className="w-full text-left flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm border border-gray-100 hover:border-teal-300 hover:shadow-md transition-all active:scale-95 pr-14"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center group-hover:bg-teal-200 transition-colors">
+                        <Users size={24} />
+                      </div>
+                      <span className="font-semibold text-gray-800 text-lg">{group.name}</span>
                     </div>
-                    <span className="font-semibold text-gray-800 text-lg">{group.name}</span>
-                  </div>
-                  <ChevronRight size={20} className="text-gray-300 group-hover:text-teal-500 transition-colors" />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setGrupoParaDeletar(group);
-                  }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
-                >
-                  <Trash2 size={20} />
-                </button>
-              </div>
-            ))}
+                    <ChevronRight size={20} className="text-gray-300 group-hover:text-teal-500 transition-colors" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setGrupoParaDeletar({ ...group, isOwner: isGroupOwner });
+                    }}
+                    className={`absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full transition-all ${isGroupOwner ? 'text-gray-300 hover:text-red-500 hover:bg-red-50' : 'text-gray-300 hover:text-orange-500 hover:bg-orange-50'}`}
+                  >
+                    {isGroupOwner ? <Trash2 size={20} /> : <LogOutIcon size={20} />}
+                  </button>
+                </div>
+              );
+            })}
           </div>
 
           {/* Formulário inline para criar novo grupo */}
@@ -160,14 +163,18 @@ export default function Login() {
           )}
         </div>
 
-        {/* Modal de confirmação de exclusão */}
+        {/* Modal de confirmação — deletar (dono) ou sair (membro) */}
         {grupoParaDeletar && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Excluir Grupo</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                {grupoParaDeletar.isOwner ? 'Excluir Grupo' : 'Sair do Grupo'}
+              </h3>
               <p className="text-gray-600 mb-6 font-medium text-sm">
-                Deseja realmente excluir <span className="font-bold text-gray-900">"{grupoParaDeletar.name}"</span>?
-                Esta ação não pode ser desfeita.
+                {grupoParaDeletar.isOwner
+                  ? <>Deseja realmente excluir <span className="font-bold text-gray-900">"{grupoParaDeletar.name}"</span>? Esta ação não pode ser desfeita.</>
+                  : <>Deseja sair do grupo <span className="font-bold text-gray-900">"{grupoParaDeletar.name}"</span>?</>
+                }
               </p>
               <div className="flex gap-3">
                 <button
@@ -178,12 +185,16 @@ export default function Login() {
                 </button>
                 <button
                   onClick={() => {
-                    deleteGroup(grupoParaDeletar.id);
+                    if (grupoParaDeletar.isOwner) {
+                      deleteGroup(grupoParaDeletar.id);
+                    } else {
+                      leaveGroup(grupoParaDeletar.id);
+                    }
                     setGrupoParaDeletar(null);
                   }}
-                  className="flex-1 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors active:scale-95"
+                  className={`flex-1 py-3 rounded-xl text-white font-semibold transition-colors active:scale-95 ${grupoParaDeletar.isOwner ? 'bg-red-600 hover:bg-red-700' : 'bg-orange-500 hover:bg-orange-600'}`}
                 >
-                  Excluir
+                  {grupoParaDeletar.isOwner ? 'Excluir' : 'Sair'}
                 </button>
               </div>
             </div>

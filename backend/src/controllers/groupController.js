@@ -13,7 +13,7 @@ export async function createGroup(req, res) {
 export async function getUserGroups(req, res) {
     try {
         const { userId } = req.params;
-        const groups = await groupService.getGroupsByUserId(userId);
+        const groups = await groupService.getGroupsByUserId(parseInt(userId));
         return res.status(200).json(groups);
     } catch (error) {
         return res.status(400).json({ error: error.message });
@@ -23,8 +23,18 @@ export async function getUserGroups(req, res) {
 export async function deleteGroup(req, res) {
     try {
         const { id } = req.params;
-        await groupService.deleteGroupService(id);
+        await groupService.deleteGroupService(parseInt(id), req.userId);
         return res.status(200).json({ message: "Grupo excluído com sucesso!" });
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+}
+
+export async function leaveGroup(req, res) {
+    try {
+        const { id } = req.params;
+        await groupService.leaveGroupService(parseInt(id), req.userId);
+        return res.status(200).json({ message: "Você saiu do grupo!" });
     } catch (error) {
         return res.status(400).json({ error: error.message });
     }
@@ -37,8 +47,8 @@ export async function deleteGroup(req, res) {
 export async function addMember(req, res) {
     try {
         const { groupId } = req.params;
-        const { name, userId } = req.body;
-        const newMember = await groupService.addMemberService(groupId, name, userId);
+        const { email } = req.body;
+        const newMember = await groupService.addMemberByEmailService(parseInt(groupId), email, req.userId);
         return res.status(201).json(newMember);
     } catch (error) {
         return res.status(400).json({ error: error.message });
@@ -58,7 +68,7 @@ export async function getMembers(req, res) {
 export async function removeMember(req, res) {
     try {
         const { id } = req.params;
-        await groupService.removeMemberService(id);
+        await groupService.removeMemberService(parseInt(id), req.userId);
         return res.status(200).json({ message: "Membro excluído com sucesso!" });
     } catch (error) {
         return res.status(400).json({ error: error.message });

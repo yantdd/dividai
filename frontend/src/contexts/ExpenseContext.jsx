@@ -101,17 +101,15 @@ export function ExpenseProvider({ children }) {
   const addMemberToGroup = async (email) => {
     if (!selectedGroup) return;
 
-    const nomeFicticio = email.split('@')[0]
-      .split('.').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
-
     try {
       const res = await fetch(`${API}/api/groups/${selectedGroup.id}/members`, {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify({ name: nomeFicticio })
+        body: JSON.stringify({ email })
       });
-      if (!res.ok) throw new Error("Erro ao adicionar membro");
-      const novoMembro = await res.json();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao adicionar membro");
+      const novoMembro = data;
 
       const membrosAtuais = allGroupMembers.filter(m => m.groupId === selectedGroup.id);
       const todosMembros = [...membrosAtuais, novoMembro];
@@ -140,8 +138,9 @@ export function ExpenseProvider({ children }) {
       });
 
       setAllGroupMembers(prev => [...prev, novoMembro]);
+      return { success: true };
     } catch (err) {
-      console.error(err);
+      return { success: false, error: err.message };
     }
   };
 
@@ -226,7 +225,27 @@ export function ExpenseProvider({ children }) {
         method: 'DELETE',
         headers: authHeaders()
       });
-      if (!response.ok) throw new Error("Falha ao deletar grupo");
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Falha ao deletar grupo");
+
+      setGroups(prev => prev.filter(g => g.id !== groupId));
+      setAllGroupMembers(prev => prev.filter(m => m.groupId !== groupId));
+      setAllExpenses(prev => prev.filter(e => e.groupId !== groupId));
+      if (selectedGroup && selectedGroup.id === groupId) {
+        setSelectedGroup(null);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const leaveGroup = async (groupId) => {
+    try {
+      const response = await fetch(`${API}/api/groups/${groupId}/leave`, {
+        method: 'POST',
+        headers: authHeaders()
+      });
+      if (!response.ok) throw new Error("Falha ao sair do grupo");
 
       setGroups(prev => prev.filter(g => g.id !== groupId));
       setAllGroupMembers(prev => prev.filter(m => m.groupId !== groupId));
@@ -442,6 +461,7 @@ export function ExpenseProvider({ children }) {
       addExpense,
       deleteExpense,
       deleteGroup,
+      leaveGroup,
       updateExpense,
       getExpenseById,
       settleDebt,
