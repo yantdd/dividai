@@ -71,12 +71,18 @@ export async function addMemberByEmailService(groupId, email, requesterId) {
         groupId,
         userId: user.id
     });
-    return newMember;
+    return { ...newMember.toJSON(), photo: user.photo || null };
 }
 
 export async function getMembersService(groupId) {
-    const members = await GroupMember.findAll({ where: { groupId } });
-    return members;
+    const members = await GroupMember.findAll({
+        where: { groupId },
+        include: [{ model: User, attributes: ['photo'] }]
+    });
+    return members.map(m => {
+        const plain = m.toJSON();
+        return { ...plain, photo: plain.User?.photo || null, User: undefined };
+    });
 }
 
 export async function removeMemberService(memberId, requesterId) {

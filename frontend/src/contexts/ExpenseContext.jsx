@@ -20,7 +20,10 @@ export function ExpenseProvider({ children }) {
   });
 
   const [groups, setGroups] = useState([]);
-  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [selectedGroup, setSelectedGroup] = useState(() => {
+    const saved = localStorage.getItem('selectedGroup');
+    return saved ? JSON.parse(saved) : null;
+  });
 
   const loginUser = (userData, token) => {
     localStorage.setItem('token', token);
@@ -32,6 +35,7 @@ export function ExpenseProvider({ children }) {
   const logoutUser = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('selectedGroup');
     setUser(null);
     setIsLoggedIn(false);
     setGroups([]);
@@ -56,6 +60,14 @@ export function ExpenseProvider({ children }) {
       setGroups([]);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (selectedGroup) {
+      localStorage.setItem('selectedGroup', JSON.stringify(selectedGroup));
+    } else {
+      localStorage.removeItem('selectedGroup');
+    }
+  }, [selectedGroup]);
 
   const [allGroupMembers, setAllGroupMembers] = useState([]);
 

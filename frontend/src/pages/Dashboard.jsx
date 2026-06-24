@@ -205,9 +205,13 @@ export default function Dashboard() {
               const isReceiving = balance > 0;
               return (
                 <div key={memberId} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 transition-colors">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm ${getAvatarColor(member.name)}`}>
-                    {getInitials(member.name)}
-                  </div>
+                  {member.photo ? (
+                    <img src={member.photo} alt={member.name} className="w-10 h-10 rounded-full object-cover shrink-0 shadow-sm" />
+                  ) : (
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm ${getAvatarColor(member.name)}`}>
+                      {getInitials(member.name)}
+                    </div>
+                  )}
 
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-800 block truncate">{member.name}</p>
@@ -259,8 +263,14 @@ export default function Dashboard() {
                 const isCurrentUser = member.userId === user?.id;
                 return (
                   <div key={member.id} className="relative flex flex-col items-center gap-1 group/member">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm ${getAvatarColor(member.name)} relative`}>
-                      {getInitials(member.name)}
+                    <div className="relative">
+                      {member.photo ? (
+                        <img src={member.photo} alt={member.name} className="w-10 h-10 rounded-full object-cover shadow-sm" />
+                      ) : (
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm ${getAvatarColor(member.name)}`}>
+                          {getInitials(member.name)}
+                        </div>
+                      )}
                       {isOwner && !isCurrentUser && (
                         <button
                           onClick={() => setMembroParaDeletar(member)}
